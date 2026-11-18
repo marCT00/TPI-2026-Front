@@ -1,4 +1,7 @@
+import { useNavigate } from 'react-router-dom';
+import Button from '../../shared/ui/atoms/Button';
 import Card from '../../shared/ui/atoms/Card';
+import { PlusIcon } from '../../shared/ui/atoms/icons';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
 import SearchInput from '../../shared/ui/molecules/SearchInput';
 import TablePagination from '../../shared/ui/molecules/TablePagination';
@@ -6,6 +9,7 @@ import DoctorsTable from '../components/DoctorsTable';
 import useDoctorsList from '../hooks/useDoctorsList';
 
 function DoctorsPage() {
+  const navigate = useNavigate();
   const list = useDoctorsList();
 
   const searchHint = list.isSearchTooShort
@@ -30,14 +34,23 @@ function DoctorsPage() {
           </p>
         </div>
 
-        <SearchInput
-          className="sm:w-72"
-          label="Buscar doctor por nombre"
-          placeholder="Buscar doctor por nombre..."
-          value={list.searchTerm}
-          hint={searchHint}
-          onChange={list.changeSearch}
-        />
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+          <SearchInput
+            className="sm:w-72"
+            label="Buscar doctor por nombre"
+            placeholder="Buscar doctor por nombre..."
+            value={list.searchTerm}
+            hint={searchHint}
+            onChange={list.changeSearch}
+          />
+          <Button
+            className="shrink-0"
+            onClick={() => navigate('/admin/doctors/new')}
+          >
+            <PlusIcon />
+            Nuevo Doctor
+          </Button>
+        </div>
       </header>
 
       {list.error && (
