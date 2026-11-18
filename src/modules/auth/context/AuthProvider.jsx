@@ -1,99 +1,121 @@
-import { createContext, useState } from 'react';
-import { login } from '../services/login';
-import { loginAdmin } from '../services/adminLogin';
-import { loginPatient } from '../services/patientLogin';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import useToast from '../../shared/ui/organisms/toast/useToast';
+import { loginAdmin, loginPatient } from '../services/authService';
+import {
+  buildSession,
+  loadActiveSession,
+  persistSession,
+  removeSession,
+} from '../helpers/session';
+import { ROLES, getHomePath } from '../helpers/roles';
+import AuthContext from './AuthContext';
 
-const AuthContext = createContext();
+const createRoleMismatchError = () => {
+  const error = new Error('El usuario no tiene el rol requerido');
+
+  error.apiError = {
+    status: 403,
+    errorCode: 'AUTHORIZATION_FAILED',
+    message: null,
+    details: [],
+  };
+
+  return error;
+};
+
+// Expone a la UI solo los datos del usuario, nunca el token (ISP).
+const toPublicUser = (session) => {
+  if (!session) {
+    return null;
+  }
+
+  const { email, dni, fullName, userId } = session;
+
+  return { email, dni, fullName, userId };
+};
 
 function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const token = localStorage.getItem('token');
+  const [session, setSession] = useState(loadActiveSession);
+  const { showToast } = useToast();
 
-    return Boolean(token);
-  });
+  const signout = useCallback(() => {
+    removeSession();
+    setSession(null);
+  }, []);
 
-  const singout = () => {
-    localStorage.clear();
-    setIsAuthenticated(false);
-  };
+  const startSession = useCallback((loginResponse, credentials, expected) => {
+    const newSession = buildSession(loginResponse, credentials);
 
-  const setAuthSession = (token) => {
-    localStorage.setItem('token', token);
-    setIsAuthenticated(true);
-  };
-
-  const singin = async (username, password) => {
-    const { data, error } = await login(username, password);
-
-    if (error) {
-      return { error };
+    if (newSession.role !== expected) {
+      throw createRoleMismatchError();
     }
 
-    setAuthSession(data);
+    persistSession(newSession);
+    setSession(newSession);
 
-    return { error: null };
-  };
+    return newSession;
+  }, []);
 
-  const singinAdmin = async (username, password) => {
-    if (
-      (username === 'admin' ||
-        username === 'admin@medportal.com' ||
-        username === 'admin@test.com') &&
-      password === 'admin123'
-    ) {
-      setAuthSession('mock-admin-token-12345');
+  const signinAdmin = useCallback(
+    async ({ email, password }) => {
+      const response = await loginAdmin({ email, password });
 
-      return { error: null };
-    }
-
-    const { data, error } = await loginAdmin(username, password);
-
-    if (error) {
-      return { error };
-    }
-
-    setAuthSession(data);
-
-    return { error: null };
-  };
-
-  const singinPatient = async (username, password) => {
-    if (
-      (username === 'paciente' ||
-        username === 'paciente@medportal.com' ||
-        username === 'paciente@test.com') &&
-      password === 'paciente123'
-    ) {
-      setAuthSession('mock-patient-token-67890');
-
-      return { error: null };
-    }
-
-    const { data, error } = await loginPatient(username, password);
-
-    if (error) {
-      return { error };
-    }
-
-    setAuthSession(data);
-
-    return { error: null };
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        singin,
-        singinAdmin,
-        singinPatient,
-        singout,
-        setAuthSession,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+      return startSession(response, { email }, ROLES.ADMIN);
+    },
+    [startSession]
   );
+
+  const signinPatient = useCallback(
+    async ({ email, dni }) => {
+      const response = await loginPatient({ email, dni });
+
+      return startSession(
+        response,
+        { email, dni: String(dni).trim() },
+        ROLES.PATIENT
+      );
+    },
+    [startSession]
+  );
+
+  // Cierra la sesión automáticamente cuando vence el JWT (claim exp).
+  useEffect(() => {
+    if (!session?.expiresAt) {
+      return undefined;
+    }
+
+    const timer = setTimeout(
+      () => {
+        signout();
+        showToast({
+          variant: 'warning',
+          title: 'Sesión expirada',
+          message: 'Por seguridad, volvé a iniciar sesión.',
+        });
+      },
+      Math.max(session.expiresAt - Date.now(), 0)
+    );
+
+    return () => clearTimeout(timer);
+  }, [session, signout, showToast]);
+
+  const value = useMemo(() => {
+    const role = session?.role ?? null;
+
+    return {
+      user: toPublicUser(session),
+      role,
+      isAuthenticated: Boolean(session),
+      isAdmin: role === ROLES.ADMIN,
+      isPatient: role === ROLES.PATIENT,
+      homePath: getHomePath(role),
+      signinAdmin,
+      signinPatient,
+      signout,
+    };
+  }, [session, signinAdmin, signinPatient, signout]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export { AuthProvider, AuthContext };
+export { AuthProvider };
