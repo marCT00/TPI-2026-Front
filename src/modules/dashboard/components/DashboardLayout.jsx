@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hook/useAuth';
+import { getDisplayName, getInitials } from '../../auth/helpers/userDisplay';
+import ConfirmModal from '../../shared/ui/organisms/ConfirmModal';
 
 function DashboardLayout() {
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const navigate = useNavigate();
-  const { singout } = useAuth();
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const { user, signout } = useAuth();
 
   const handleLogout = () => {
-    singout();
-    navigate('/admin/login');
+    setConfirmLogout(false);
+    signout();
+    navigate('/admin/login', { replace: true });
   };
 
   const navItems = [
@@ -141,7 +145,8 @@ function DashboardLayout() {
         {/* Footer Sidebar (Help, Logout & User profile) */}
         <div className="p-4 border-t border-med-border-subtle space-y-3">
           <button
-            onClick={handleLogout}
+            type="button"
+            onClick={() => setConfirmLogout(true)}
             className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-med-text-sub hover:text-red-600 hover:bg-red-50 rounded-lg transition"
           >
             <svg
@@ -163,14 +168,17 @@ function DashboardLayout() {
           {/* User Profile Info */}
           <div className="pt-3 border-t border-med-border flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-med-primary-100 text-med-primary-900 flex items-center justify-center font-bold text-xs">
-              AD
+              {getInitials(user)}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-med-text-main truncate">
-                Admin User
+              <p
+                className="text-xs font-semibold text-med-text-main truncate"
+                title={getDisplayName(user)}
+              >
+                {getDisplayName(user)}
               </p>
               <p className="text-[11px] text-med-text-muted truncate">
-                Super Administrator
+                Administrador
               </p>
             </div>
           </div>
@@ -198,6 +206,9 @@ function DashboardLayout() {
             </span>
           </div>
           <button
+            type="button"
+            aria-label="Abrir menú"
+            aria-expanded={openMobileMenu}
             onClick={() => setOpenMobileMenu(!openMobileMenu)}
             className="p-1.5 rounded-lg border border-med-border text-med-text-sub"
           >
@@ -222,6 +233,15 @@ function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+
+      <ConfirmModal
+        open={confirmLogout}
+        title="¿Cerrar sesión?"
+        message="Vas a salir del portal administrativo."
+        confirmLabel="Cerrar sesión"
+        onConfirm={handleLogout}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </div>
   );
 }
