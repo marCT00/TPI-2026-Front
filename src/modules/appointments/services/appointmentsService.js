@@ -56,4 +56,17 @@ const searchAppointments = async (
   };
 };
 
-export { searchAppointments };
+// GET /api/appointments?date=YYYY-MM-DD (turnos agendados para un día)
+const getAppointmentsByDate = async (date, { signal } = {}) => {
+  const { data } = await instance.get(APPOINTMENTS_ENDPOINT, {
+    params: { date },
+    signal,
+  });
+
+  return {
+    items: (data?.data ?? []).map(toAppointment),
+    total: data?.total ?? 0,
+  };
+};
+
+export { searchAppointments, getAppointmentsByDate };
