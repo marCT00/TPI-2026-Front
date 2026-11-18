@@ -3,8 +3,11 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
+import ToastProvider from './modules/shared/ui/organisms/toast/ToastProvider';
 import { AuthProvider } from './modules/auth/context/AuthProvider';
 import ProtectedRoute from './modules/auth/components/ProtectedRoute';
+import GuestRoute from './modules/auth/components/GuestRoute';
+import { ROLES } from './modules/auth/helpers/roles';
 
 // Auth Module
 import AdminLoginPage from './modules/auth/pages/AdminLoginPage';
@@ -22,24 +25,33 @@ import OverviewPage from './modules/dashboard/pages/OverviewPage';
 // Domain Modules (Screaming Architecture)
 import DoctorsPage from './modules/doctors/pages/DoctorsPage';
 import SpecialtiesPage from './modules/specialties/pages/SpecialtiesPage';
+import SpecialtyFormPage from './modules/specialties/pages/SpecialtyFormPage';
 import AppointmentsSearchPage from './modules/appointments/pages/AppointmentsSearchPage';
 
 const routes = [
   // Rutas públicas
   {
     path: '/login',
-    element: <PatientLoginPage />,
+    element: (
+      <GuestRoute>
+        <PatientLoginPage />
+      </GuestRoute>
+    ),
   },
   {
     path: '/admin/login',
-    element: <AdminLoginPage />,
+    element: (
+      <GuestRoute>
+        <AdminLoginPage />
+      </GuestRoute>
+    ),
   },
 
   // Rutas privadas de pacientes (URL base y turnos)
   {
     path: '/',
     element: (
-      <ProtectedRoute redirectTo="/login">
+      <ProtectedRoute allowedRoles={[ROLES.PATIENT]} redirectTo="/login">
         <PatientLayout />
       </ProtectedRoute>
     ),
@@ -59,7 +71,7 @@ const routes = [
   {
     path: '/admin',
     element: (
-      <ProtectedRoute redirectTo="/admin/login">
+      <ProtectedRoute allowedRoles={[ROLES.ADMIN]} redirectTo="/admin/login">
         <DashboardLayout />
       </ProtectedRoute>
     ),
@@ -89,6 +101,14 @@ const routes = [
         element: <SpecialtiesPage />,
       },
       {
+        path: 'specialties/new',
+        element: <SpecialtyFormPage />,
+      },
+      {
+        path: 'specialties/:id/edit',
+        element: <SpecialtyFormPage />,
+      },
+      {
         path: 'doctors',
         element: <DoctorsPage />,
       },
@@ -102,13 +122,17 @@ const routes = [
   },
 ];
 
-function App() {
-  const router = createBrowserRouter(routes);
+// Se crea una sola vez (fuera del componente) para no reconstruir el router
+// en cada render.
+const router = createBrowserRouter(routes);
 
+function App() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 
