@@ -1,15 +1,27 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hook/useAuth';
+import { getDisplayName, getInitials } from '../../auth/helpers/userDisplay';
+import ConfirmModal from '../../shared/ui/organisms/ConfirmModal';
+import useToast from '../../shared/ui/organisms/toast/useToast';
 
 function PatientLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { singout } = useAuth();
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const { user, signout } = useAuth();
+  const { showToast } = useToast();
+  const displayName = getDisplayName(user);
 
   const handleLogout = () => {
-    singout();
-    navigate('/login');
+    setConfirmLogout(false);
+    signout();
+    navigate('/login', { replace: true });
+  };
+
+  const requestLogout = () => {
+    setMobileMenuOpen(false);
+    setConfirmLogout(true);
   };
 
   const getNavLinkClass = ({ isActive }) =>
@@ -64,7 +76,9 @@ function PatientLayout() {
             <button
               type="button"
               title="Notificaciones"
-              onClick={() => alert('No tienes notificaciones pendientes')}
+              onClick={() =>
+                showToast({ message: 'No tenés notificaciones pendientes.' })
+              }
               className="hidden sm:flex p-2 rounded-lg text-med-text-muted hover:text-med-primary-900 hover:bg-gray-50 transition"
             >
               <svg
@@ -85,15 +99,26 @@ function PatientLayout() {
             {/* Avatar Paciente */}
             <div className="flex items-center gap-2.5 pl-2 sm:border-l sm:border-med-border">
               <div className="w-8 h-8 rounded-full bg-med-primary-100 text-med-primary-900 font-bold text-xs flex items-center justify-center border border-med-primary-200">
-                JD
+                {getInitials(user)}
               </div>
-              <span className="hidden sm:inline-block text-xs font-semibold text-med-text-main">
-                Johnathan Doe
-              </span>
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span
+                  className="text-xs font-semibold text-med-text-main max-w-48 truncate"
+                  title={displayName}
+                >
+                  {displayName}
+                </span>
+                {user?.dni && (
+                  <span className="text-[11px] text-med-text-muted">
+                    DNI {user.dni}
+                  </span>
+                )}
+              </div>
             </div>
 
             <button
-              onClick={handleLogout}
+              type="button"
+              onClick={requestLogout}
               className="hidden sm:inline-flex text-xs font-semibold text-med-text-sub hover:text-red-600 px-2.5 py-1.5 rounded-lg border border-med-border hover:bg-red-50/40 transition"
             >
               Salir
@@ -102,6 +127,8 @@ function PatientLayout() {
             {/* Botón hamburguesa móvil */}
             <button
               type="button"
+              aria-label="Abrir menú"
+              aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-1.5 rounded-lg border border-med-border text-med-text-sub hover:bg-gray-50"
             >
@@ -153,11 +180,12 @@ function PatientLayout() {
               Mis Turnos
             </NavLink>
             <div className="pt-2 border-t border-med-border-subtle flex items-center justify-between">
-              <span className="text-xs font-medium text-med-text-sub">
-                Paciente: Johnathan Doe
+              <span className="text-xs font-medium text-med-text-sub truncate">
+                Paciente: {displayName}
               </span>
               <button
-                onClick={handleLogout}
+                type="button"
+                onClick={requestLogout}
                 className="text-xs font-bold text-red-600"
               >
                 Cerrar sesión
@@ -171,6 +199,15 @@ function PatientLayout() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         <Outlet />
       </main>
+
+      <ConfirmModal
+        open={confirmLogout}
+        title="¿Cerrar sesión?"
+        message="Vas a salir del Portal Salud."
+        confirmLabel="Cerrar sesión"
+        onConfirm={handleLogout}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </div>
   );
 }
