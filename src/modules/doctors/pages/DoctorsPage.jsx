@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/ui/atoms/Button';
 import Card from '../../shared/ui/atoms/Card';
@@ -5,12 +6,19 @@ import { PlusIcon } from '../../shared/ui/atoms/icons';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
 import SearchInput from '../../shared/ui/molecules/SearchInput';
 import TablePagination from '../../shared/ui/molecules/TablePagination';
+import ConfirmModal from '../../shared/ui/organisms/ConfirmModal';
+import useToast from '../../shared/ui/organisms/toast/useToast';
+import { getErrorMessage } from '../../shared/api/parseBackendError';
 import DoctorsTable from '../components/DoctorsTable';
 import useDoctorsList from '../hooks/useDoctorsList';
+import { deleteDoctor } from '../services/doctorsService';
 
 function DoctorsPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const list = useDoctorsList();
+  const [toDelete, setToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const searchHint = list.isSearchTooShort
     ? `Escribí al menos ${list.minSearchLength} caracteres para filtrar.`
@@ -18,6 +26,24 @@ function DoctorsPage() {
   const emptyMessage = list.isFiltered
     ? 'No se encontraron médicos con ese nombre.'
     : 'Todavía no hay médicos registrados.';
+
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+
+    try {
+      await deleteDoctor(toDelete.id);
+      showToast({
+        variant: 'success',
+        message: `Se dio de baja a "${toDelete.name}".`,
+      });
+      setToDelete(null);
+      list.refreshAfterDelete();
+    } catch (error) {
+      showToast({ variant: 'error', message: getErrorMessage(error) });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <section aria-labelledby="doctors-title" className="flex flex-col gap-6">
@@ -76,6 +102,7 @@ function DoctorsPage() {
           items={list.items}
           isLoading={list.isLoading}
           emptyMessage={emptyMessage}
+          onDelete={setToDelete}
         />
         <TablePagination
           currentPage={list.page}
@@ -85,6 +112,20 @@ function DoctorsPage() {
           onPageChange={list.setPage}
         />
       </Card>
+
+      <ConfirmModal
+        open={Boolean(toDelete)}
+        title="¿Dar de baja al médico?"
+        message={
+          toDelete
+            ? `"${toDelete.name}" dejará de aparecer en el directorio y no podrá recibir nuevos turnos.`
+            : ''
+        }
+        confirmLabel="Dar de baja"
+        isLoading={isDeleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setToDelete(null)}
+      />
     </section>
   );
 }
