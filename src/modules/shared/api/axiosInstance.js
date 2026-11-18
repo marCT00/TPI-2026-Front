@@ -1,35 +1,45 @@
 import axios from 'axios';
+import { clearSession, getToken } from './sessionStore';
+import { parseBackendError } from './parseBackendError';
+
+const AUTH_ENDPOINT_PREFIX = 'api/auth/';
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
-  withCredentials: true,
 });
 
-instance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
+instance.interceptors.request.use((config) => {
+  const token = getToken();
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  return config;
+});
+
+// En los endpoints de login un 401 significa "credenciales incorrectas":
+// no hay sesión que cerrar ni a dónde redirigir.
+const isAuthRequest = (config) =>
+  (config?.url ?? '').replace(/^\//, '').startsWith(AUTH_ENDPOINT_PREFIX);
+
+const redirectToLogin = () => {
+  const { pathname } = window.location;
+  const loginPath = pathname.startsWith('/admin') ? '/admin/login' : '/login';
+
+  if (pathname !== loginPath) {
+    window.location.assign(loginPath);
+  }
+};
 
 instance.interceptors.response.use(
-  (config) => {
-    return config;
-  },
+  (response) => response,
   (error) => {
-    if (error.status === 401) {
-      if (window.location.pathname.includes('/admin/')) {
-        localStorage.clear();
-        window.location.href = '/login';
-      } else {
-        localStorage.removeItem('token');
-      }
+    error.apiError = parseBackendError(error);
+
+    if (error.apiError.status === 401 && !isAuthRequest(error.config)) {
+      clearSession();
+      redirectToLogin();
     }
 
     return Promise.reject(error);
