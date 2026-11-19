@@ -1,0 +1,109 @@
+import { useForm } from 'react-hook-form';
+import Button from '../../shared/ui/atoms/Button';
+import Input from '../../shared/ui/atoms/Input';
+import Select from '../../shared/ui/atoms/Select';
+import {
+  IdCardIcon,
+  SaveIcon,
+  StethoscopeIcon,
+  UserIcon,
+} from '../../shared/ui/atoms/icons';
+import AlertBanner from '../../shared/ui/molecules/AlertBanner';
+import {
+  LICENSE_LIMITS,
+  NAME_LIMITS,
+  licenseRules,
+  nameRules,
+  specialtyRules,
+} from '../helpers/doctorRules';
+
+const EMPTY_VALUES = { name: '', specialtyId: '', licenseNumber: '' };
+
+const getSpecialtyPlaceholder = (isLoading, hasOptions) => {
+  if (isLoading) {
+    return 'Cargando especialidades...';
+  }
+
+  return hasOptions
+    ? 'Seleccione especialidad'
+    : 'Primero registrá una especialidad';
+};
+
+// No conoce el backend: recibe las especialidades y onSubmit. Si el guardado
+// falla, la página marca el campo con setFieldError.
+function DoctorForm({
+  specialtyOptions,
+  isLoadingSpecialties,
+  submitError = '',
+  onSubmit,
+  onCancel,
+}) {
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm({ defaultValues: EMPTY_VALUES, mode: 'onTouched' });
+
+  const hasOptions = specialtyOptions.length > 0;
+
+  const onValid = (values) =>
+    onSubmit(values, {
+      setFieldError: (field, message) => setError(field, { message }),
+    });
+
+  return (
+    <form noValidate onSubmit={handleSubmit(onValid)}>
+      <fieldset disabled={isSubmitting} className="flex flex-col gap-5">
+        <legend className="sr-only">Datos del doctor</legend>
+
+        <Input
+          label="Nombre Completo del Doctor"
+          placeholder="Ej: Dr. Alejandro Martínez"
+          maxLength={NAME_LIMITS.max}
+          leftIcon={<UserIcon />}
+          error={errors.name?.message}
+          {...register('name', nameRules)}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <Select
+            label="Especialidad"
+            placeholder={getSpecialtyPlaceholder(
+              isLoadingSpecialties,
+              hasOptions
+            )}
+            options={specialtyOptions}
+            disabled={isLoadingSpecialties || !hasOptions}
+            leftIcon={<StethoscopeIcon />}
+            error={errors.specialtyId?.message}
+            {...register('specialtyId', specialtyRules)}
+          />
+
+          <Input
+            label="Número de Licencia Médica"
+            placeholder="ID-45920-X"
+            maxLength={LICENSE_LIMITS.max}
+            leftIcon={<IdCardIcon />}
+            error={errors.licenseNumber?.message}
+            {...register('licenseNumber', licenseRules)}
+          />
+        </div>
+
+        {submitError && <AlertBanner>{submitError}</AlertBanner>}
+
+        <footer className="flex flex-col-reverse gap-2 pt-5 border-t border-med-border sm:flex-row sm:justify-end">
+          <Button variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="submit" isLoading={isSubmitting}>
+            {!isSubmitting && <SaveIcon />}
+            Guardar Doctor
+          </Button>
+        </footer>
+      </fieldset>
+    </form>
+  );
+}
+
+export default DoctorForm;

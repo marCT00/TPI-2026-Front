@@ -1,9 +1,6 @@
 import { instance } from '../../shared/api/axiosInstance';
 
-// La consigna define "api/specialties", pero el backend (feature/mar) hoy
-// expone "api/specialities". Cuando el backend acepte la ruta de la consigna,
-// se cambia solo esta constante.
-const SPECIALTIES_ENDPOINT = 'api/specialities';
+const SPECIALTIES_ENDPOINT = 'api/specialties';
 
 const toSpecialty = (raw) => ({
   id: raw.id,
