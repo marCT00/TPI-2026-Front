@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Button from '../../shared/ui/atoms/Button';
 import Input from '../../shared/ui/atoms/Input';
-import { IdCardIcon, MailIcon } from '../../shared/ui/atoms/icons';
+import {
+  EyeIcon,
+  EyeOffIcon,
+  IdCardIcon,
+  MailIcon,
+} from '../../shared/ui/atoms/icons';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
 import { getErrorMessage } from '../../shared/api/parseBackendError';
 import AuthPageTemplate from '../../auth/components/AuthPageTemplate';
@@ -19,6 +24,7 @@ const LOGIN_ERROR_MESSAGES = {
 
 function PatientLoginPage() {
   const [submitError, setSubmitError] = useState('');
+  const [showDni, setShowDni] = useState(false);
   const { signinPatient } = useAuth();
   const {
     register,
@@ -73,13 +79,24 @@ function PatientLoginPage() {
 
           <Input
             label="DNI / Número de Identificación"
-            type="text"
+            type={showDni ? 'text' : 'password'}
             inputMode="numeric"
             autoComplete="off"
             maxLength={8}
             placeholder="Ej: 35123456"
             hint="7 u 8 dígitos, sin puntos."
             leftIcon={<IdCardIcon />}
+            rightSlot={
+              <button
+                type="button"
+                onClick={() => setShowDni((current) => !current)}
+                aria-label={showDni ? 'Ocultar DNI' : 'Mostrar DNI'}
+                title={showDni ? 'Ocultar DNI' : 'Mostrar DNI'}
+                className="text-med-text-muted hover:text-med-text-main"
+              >
+                {showDni ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            }
             error={errors.dni?.message}
             {...dniField}
             onChange={handleDniChange}
