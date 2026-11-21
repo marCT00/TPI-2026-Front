@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useToast from '../../shared/ui/organisms/toast/useToast';
+import { getErrorMessage } from '../../shared/api/parseBackendError';
 import { loginAdmin, loginPatient } from '../services/authService';
 import {
   buildSession,
@@ -78,6 +79,27 @@ function AuthProvider({ children }) {
     [startSession]
   );
 
+  // Login genérico que usa LoginForm (usuario + segundo campo). Según el área
+  // donde se muestra, delega en el login de administrador o el de paciente.
+  const singin = useCallback(
+    async (username, secret) => {
+      const isAdminArea = window.location.pathname.startsWith('/admin');
+
+      try {
+        if (isAdminArea) {
+          await signinAdmin({ email: username, password: secret });
+        } else {
+          await signinPatient({ email: username, dni: secret });
+        }
+
+        return { error: null };
+      } catch (error) {
+        return { error: { frontendErrorMessage: getErrorMessage(error) } };
+      }
+    },
+    [signinAdmin, signinPatient]
+  );
+
   // Cierra la sesión automáticamente cuando vence el JWT (claim exp).
   useEffect(() => {
     if (!session?.expiresAt) {
@@ -109,11 +131,12 @@ function AuthProvider({ children }) {
       isAdmin: role === ROLES.ADMIN,
       isPatient: role === ROLES.PATIENT,
       homePath: getHomePath(role),
+      singin,
       signinAdmin,
       signinPatient,
       signout,
     };
-  }, [session, signinAdmin, signinPatient, signout]);
+  }, [session, singin, signinAdmin, signinPatient, signout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
