@@ -1,4 +1,4 @@
-function SpecialtyStatusBadge({ isActive }) {
+function SpecialityStatusBadge({ isActive }) {
   return isActive ? (
     <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-med-active-bg text-med-active-text">
       Activo
@@ -10,4 +10,4 @@ function SpecialtyStatusBadge({ isActive }) {
   );
 }
 
-export default SpecialtyStatusBadge;
+export default SpecialityStatusBadge;

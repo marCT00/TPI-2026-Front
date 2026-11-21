@@ -24,8 +24,9 @@ import OverviewPage from './modules/dashboard/pages/OverviewPage';
 
 // Domain Modules (Screaming Architecture)
 import DoctorsPage from './modules/doctors/pages/DoctorsPage';
-import SpecialtiesPage from './modules/specialties/pages/SpecialtiesPage';
-import SpecialtyFormPage from './modules/specialties/pages/SpecialtyFormPage';
+import DoctorFormPage from './modules/doctors/pages/DoctorFormPage';
+import SpecialitiesPage from './modules/specialities/pages/SpecialitiesPage';
+import SpecialityFormPage from './modules/specialities/pages/SpecialityFormPage';
 import AppointmentsSearchPage from './modules/appointments/pages/AppointmentsSearchPage';
 
 const routes = [
@@ -97,20 +98,24 @@ const routes = [
         element: <Navigate to="/admin/patients" replace />,
       },
       {
-        path: 'specialties',
-        element: <SpecialtiesPage />,
+        path: 'specialities',
+        element: <SpecialitiesPage />,
       },
       {
-        path: 'specialties/new',
-        element: <SpecialtyFormPage />,
+        path: 'specialities/new',
+        element: <SpecialityFormPage />,
       },
       {
-        path: 'specialties/:id/edit',
-        element: <SpecialtyFormPage />,
+        path: 'specialities/:id/edit',
+        element: <SpecialityFormPage />,
       },
       {
         path: 'doctors',
         element: <DoctorsPage />,
+      },
+      {
+        path: 'doctors/new',
+        element: <DoctorFormPage />,
       },
     ],
   },

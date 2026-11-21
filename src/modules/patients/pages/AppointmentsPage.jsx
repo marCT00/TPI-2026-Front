@@ -6,7 +6,7 @@ function AppointmentsPage() {
     {
       id: 1,
       doctor: 'Dra. María González',
-      specialty: 'Cardiología',
+      speciality: 'Cardiología',
       date: '2026-10-28',
       time: '10:30 hs',
       status: 'Confirmado',
@@ -14,7 +14,7 @@ function AppointmentsPage() {
     {
       id: 2,
       doctor: 'Dr. Lucas Fernández',
-      specialty: 'Traumatología',
+      speciality: 'Traumatología',
       date: '2026-11-05',
       time: '15:00 hs',
       status: 'Pendiente',
@@ -46,14 +46,13 @@ function AppointmentsPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-med-primary-100 text-med-primary-700">
-                  {appt.specialty}
+                  {appt.speciality}
                 </span>
                 <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                    appt.status === 'Confirmado'
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${appt.status === 'Confirmado'
                       ? 'bg-med-active-bg text-med-active-text'
                       : 'bg-med-leave-bg text-med-leave-text'
-                  }`}
+                    }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-current" />
                   {appt.status}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import useDebouncedValue from '../../shared/hooks/useDebouncedValue';
 import { getErrorMessage } from '../../shared/api/parseBackendError';
-import { getSpecialties } from '../services/specialtiesService';
+import { getSpecialities } from '../services/specialitiesService';
 
 const PAGE_SIZE = 10;
 const MIN_SEARCH_LENGTH = 3;
@@ -9,7 +9,7 @@ const SEARCH_DELAY_MS = 300;
 
 // Estado del listado: paginado, búsqueda por nombre y carga/error.
 // La página actual la lleva el frontend (el backend devuelve pageIndex base 0).
-function useSpecialtiesList() {
+function useSpecialitiesList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [items, setItems] = useState([]);
@@ -30,7 +30,7 @@ function useSpecialtiesList() {
     setIsLoading(true);
     setError('');
 
-    getSpecialties(
+    getSpecialities(
       { pageSize: PAGE_SIZE, pageIndex: page, name: nameFilter },
       { signal: controller.signal }
     )
@@ -89,4 +89,4 @@ function useSpecialtiesList() {
   };
 }
 
-export default useSpecialtiesList;
+export default useSpecialitiesList;

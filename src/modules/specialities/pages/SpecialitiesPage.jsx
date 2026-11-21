@@ -9,14 +9,14 @@ import TablePagination from '../../shared/ui/molecules/TablePagination';
 import ConfirmModal from '../../shared/ui/organisms/ConfirmModal';
 import useToast from '../../shared/ui/organisms/toast/useToast';
 import { getErrorMessage } from '../../shared/api/parseBackendError';
-import SpecialtiesTable from '../components/SpecialtiesTable';
-import useSpecialtiesList from '../hooks/useSpecialtiesList';
-import { deleteSpecialty } from '../services/specialtiesService';
+import SpecialitiesTable from '../components/SpecialitiesTable';
+import useSpecialitiesList from '../hooks/useSpecialitiesList';
+import { deleteSpeciality } from '../services/specialitiesService';
 
-function SpecialtiesPage() {
+function SpecialitiesPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const list = useSpecialtiesList();
+  const list = useSpecialitiesList();
   const [toDelete, setToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -31,7 +31,7 @@ function SpecialtiesPage() {
     setIsDeleting(true);
 
     try {
-      await deleteSpecialty(toDelete.id);
+      await deleteSpeciality(toDelete.id);
       showToast({
         variant: 'success',
         message: `La especialidad "${toDelete.name}" fue dada de baja.`,
@@ -47,13 +47,13 @@ function SpecialtiesPage() {
 
   return (
     <section
-      aria-labelledby="specialties-title"
+      aria-labelledby="specialities-title"
       className="flex flex-col gap-6"
     >
       <header className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
         <div>
           <h1
-            id="specialties-title"
+            id="specialities-title"
             className="text-2xl sm:text-3xl font-bold tracking-tight text-med-text-main"
           >
             Directorio de Especialidades
@@ -75,7 +75,7 @@ function SpecialtiesPage() {
           />
           <Button
             className="shrink-0"
-            onClick={() => navigate('/admin/specialties/new')}
+            onClick={() => navigate('/admin/specialities/new')}
           >
             <PlusIcon />
             Nueva Especialidad
@@ -97,12 +97,12 @@ function SpecialtiesPage() {
       )}
 
       <Card as="article" className="p-0 overflow-hidden">
-        <SpecialtiesTable
+        <SpecialitiesTable
           items={list.items}
           isLoading={list.isLoading}
           emptyMessage={emptyMessage}
-          onEdit={(specialty) =>
-            navigate(`/admin/specialties/${specialty.id}/edit`)
+          onEdit={(speciality) =>
+            navigate(`/admin/specialities/${speciality.id}/edit`)
           }
           onDelete={setToDelete}
         />
@@ -148,4 +148,4 @@ function SpecialtiesPage() {
   );
 }
 
-export default SpecialtiesPage;
+export default SpecialitiesPage;
