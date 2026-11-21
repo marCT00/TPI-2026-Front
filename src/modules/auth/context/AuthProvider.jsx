@@ -79,14 +79,15 @@ function AuthProvider({ children }) {
     [startSession]
   );
 
-  // Login genérico que usa LoginForm (usuario + segundo campo). Según el área
-  // donde se muestra, delega en el login de administrador o el de paciente.
-  const singin = useCallback(
-    async (username, secret) => {
-      const isAdminArea = window.location.pathname.startsWith('/admin');
+  // Login unificado por rol o área para consumidores genéricos del contexto.
+  const signin = useCallback(
+    async (username, secret, role) => {
+      const isAdminLogin =
+        role === ROLES.ADMIN ||
+        (!role && window.location.pathname.startsWith('/admin'));
 
       try {
-        if (isAdminArea) {
+        if (isAdminLogin) {
           await signinAdmin({ email: username, password: secret });
         } else {
           await signinPatient({ email: username, dni: secret });
@@ -131,12 +132,13 @@ function AuthProvider({ children }) {
       isAdmin: role === ROLES.ADMIN,
       isPatient: role === ROLES.PATIENT,
       homePath: getHomePath(role),
-      singin,
+      signin,
+      singin: signin,
       signinAdmin,
       signinPatient,
       signout,
     };
-  }, [session, singin, signinAdmin, signinPatient, signout]);
+  }, [session, signin, signinAdmin, signinPatient, signout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

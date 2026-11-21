@@ -1,96 +1,128 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Input from '../../shared/components/Input';
-import Button from '../../shared/components/Button';
-import useAuth from '../hook/useAuth';
-import { frontendErrorMessage } from '../helpers/backendError';
+import Button from '../../shared/ui/atoms/Button';
+import Input from '../../shared/ui/atoms/Input';
+import {
+  EyeIcon,
+  EyeOffIcon,
+  LockIcon,
+  MailIcon,
+} from '../../shared/ui/atoms/icons';
+import AlertBanner from '../../shared/ui/molecules/AlertBanner';
+import { getErrorMessage } from '../../shared/api/parseBackendError';
+import { emailRules } from '../helpers/validationRules';
 
-function LoginForm({ redirectPath, title }) {
-  const [errorMessage, setErrorMessage] = useState('');
+const DEFAULT_TOGGLE_LABELS = {
+  show: 'Mostrar contraseña',
+  hide: 'Ocultar contraseña',
+};
+
+// Organismo de formulario de autenticación reutilizable para Admin y Paciente (OCP).
+function LoginForm({
+  legend = 'Credenciales de acceso',
+  emailPlaceholder = 'correo@ejemplo.com',
+  emailAutoComplete = 'email',
+  secretField,
+  submitLabel = 'Iniciar Sesión',
+  errorMessages = {},
+  onSubmit,
+  footer = null,
+}) {
+  const {
+    name: secretName = 'password',
+    label: secretLabel = 'Contraseña',
+    placeholder: secretPlaceholder = '••••••••',
+    hint: secretHint = '',
+    autoComplete: secretAutoComplete = 'current-password',
+    inputMode: secretInputMode,
+    maxLength: secretMaxLength,
+    leftIcon: secretLeftIcon = <LockIcon />,
+    toggleLabels = DEFAULT_TOGGLE_LABELS,
+    rules: secretRules = {},
+    numericOnly = false,
+  } = secretField ?? {};
+
+  const [submitError, setSubmitError] = useState('');
+  const [showSecret, setShowSecret] = useState(false);
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm({ defaultValues: { username: '', password: '' } });
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: { email: '', [secretName]: '' },
+    mode: 'onTouched',
+  });
 
-  const navigate = useNavigate();
-  const location = useLocation();
+  const secretRegistration = register(secretName, secretRules);
+  const toggleLabel = showSecret ? toggleLabels.hide : toggleLabels.show;
 
-  const { singin } = useAuth();
+  const handleSecretChange = (event) => {
+    if (numericOnly) {
+      event.target.value = event.target.value.replace(/\D/g, '');
+    }
+
+    secretRegistration.onChange(event);
+  };
 
   const onValid = async (formData) => {
+    setSubmitError('');
+
     try {
-      const { error } = await singin(formData.username, formData.password);
-
-      if (error) {
-        setErrorMessage(error.frontendErrorMessage);
-
-        return;
-      }
-
-      const defaultRedirect = location.pathname.startsWith('/admin')
-        ? '/admin/home'
-        : '/appointments';
-
-      navigate(redirectPath || defaultRedirect);
+      await onSubmit(formData);
     } catch (error) {
-      if (error?.response?.data?.code) {
-        setErrorMessage(frontendErrorMessage[error?.response?.data?.code]);
-      } else {
-        setErrorMessage('Llame a soporte');
-      }
+      setSubmitError(getErrorMessage(error, errorMessages));
     }
   };
 
-  const formTitle =
-    title ||
-    (location.pathname.startsWith('/admin')
-      ? 'Acceso Administración'
-      : 'Acceso Pacientes');
-
   return (
-    <form
-      className="
-        flex
-        flex-col
-        gap-6
-        bg-white
-        p-8
-        sm:w-md
-        sm:gap-4
-        sm:rounded-lg
-        sm:shadow-lg
-      "
-      onSubmit={handleSubmit(onValid)}
-    >
-      <h2 className="text-xl font-bold text-center text-gray-800">
-        {formTitle}
-      </h2>
-      <Input
-        label="Usuario"
-        {...register('username', {
-          required: 'Usuario es obligatorio',
-        })}
-        error={errors.username?.message}
-      />
-      <Input
-        label="DNI"
-        {...register('password', {
-          required: 'DNI es obligatorio',
-        })}
-        type="password"
-        error={errors.password?.message}
-      />
+    <form noValidate onSubmit={handleSubmit(onValid)}>
+      <fieldset disabled={isSubmitting} className="flex flex-col gap-4">
+        <legend className="sr-only">{legend}</legend>
 
-      <Button type="submit">Iniciar Sesión</Button>
-      <Button
-        variant="secondary"
-        onClick={() => alert('Debe impletar navegacion y pagina de registro')}
-      >
-        Registrar Usuario
-      </Button>
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        <Input
+          label="Correo Electrónico"
+          type="email"
+          autoComplete={emailAutoComplete}
+          placeholder={emailPlaceholder}
+          leftIcon={<MailIcon />}
+          error={errors.email?.message}
+          {...register('email', emailRules)}
+        />
+
+        <Input
+          label={secretLabel}
+          type={showSecret ? 'text' : 'password'}
+          inputMode={secretInputMode}
+          autoComplete={secretAutoComplete}
+          maxLength={secretMaxLength}
+          placeholder={secretPlaceholder}
+          hint={secretHint}
+          leftIcon={secretLeftIcon}
+          rightSlot={
+            <button
+              type="button"
+              onClick={() => setShowSecret((current) => !current)}
+              aria-label={toggleLabel}
+              title={toggleLabel}
+              className="text-med-text-muted hover:text-med-text-main"
+            >
+              {showSecret ? <EyeOffIcon /> : <EyeIcon />}
+            </button>
+          }
+          error={errors[secretName]?.message}
+          {...secretRegistration}
+          onChange={handleSecretChange}
+        />
+
+        {submitError && <AlertBanner>{submitError}</AlertBanner>}
+
+        <Button type="submit" className="w-full mt-1" isLoading={isSubmitting}>
+          {submitLabel}
+        </Button>
+
+        {footer}
+      </fieldset>
     </form>
   );
 }
