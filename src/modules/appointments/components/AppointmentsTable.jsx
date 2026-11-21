@@ -2,8 +2,6 @@ import ListSkeleton from '../../shared/ui/molecules/ListSkeleton';
 import TableSkeleton from '../../shared/ui/molecules/TableSkeleton';
 import AppointmentStatusBadge from './AppointmentStatusBadge';
 
-const COLUMNS = 4;
-
 const dateFormatter = new Intl.DateTimeFormat('es-AR', {
   day: '2-digit',
   month: 'short',
@@ -11,8 +9,8 @@ const dateFormatter = new Intl.DateTimeFormat('es-AR', {
 });
 
 // "2026-11-24" -> "24 nov 2026" (se arma en hora local para no correr el día)
-const formatDate = (value) => {
-  const [year, month, day] = value.split('-').map(Number);
+const formatDate = (value = '') => {
+  const [year, month, day] = String(value).split('-').map(Number);
 
   if (!year || !month || !day) {
     return value;
@@ -47,8 +45,14 @@ function DetailLine({ title, subtitle }) {
 }
 
 // En mobile se muestra como lista de tarjetas y desde md como tabla.
-function AppointmentsTable({ items, isLoading, emptyMessage }) {
+function AppointmentsTable({
+  items = [],
+  isLoading = false,
+  emptyMessage,
+  onViewDetail,
+}) {
   const isEmpty = !isLoading && items.length === 0;
+  const columns = onViewDetail ? 5 : 4;
 
   return (
     <>
@@ -77,11 +81,22 @@ function AppointmentsTable({ items, isLoading, emptyMessage }) {
                       subtitle={appointment.doctor.name}
                     />
                   </div>
-                  <div>
-                    <DetailLine
-                      title={appointment.patient.name || 'Sin nombre'}
-                      subtitle={`DNI: ${appointment.patient.dni}`}
-                    />
+                  <div className="flex items-end justify-between gap-3">
+                    <div>
+                      <DetailLine
+                        title={appointment.patient.name || 'Paciente'}
+                        subtitle={`DNI: ${appointment.patient.dni}`}
+                      />
+                    </div>
+                    {onViewDetail && (
+                      <button
+                        type="button"
+                        onClick={() => onViewDetail(appointment)}
+                        className="shrink-0 text-xs font-semibold text-med-primary-700 hover:text-med-primary-900"
+                      >
+                        Ver Detalle
+                      </button>
+                    )}
                   </div>
                 </article>
               </li>
@@ -99,7 +114,7 @@ function AppointmentsTable({ items, isLoading, emptyMessage }) {
                 Fecha
               </th>
               <th scope="col" className="px-6 py-3.5">
-                Especialidad
+                Departamento
               </th>
               <th scope="col" className="px-6 py-3.5">
                 Paciente
@@ -107,17 +122,22 @@ function AppointmentsTable({ items, isLoading, emptyMessage }) {
               <th scope="col" className="px-6 py-3.5 text-center">
                 Estado
               </th>
+              {onViewDetail && (
+                <th scope="col" className="px-6 py-3.5 text-right">
+                  Acciones
+                </th>
+              )}
             </tr>
           </thead>
 
           {isLoading ? (
-            <TableSkeleton rows={5} columns={COLUMNS} />
+            <TableSkeleton rows={5} columns={columns} />
           ) : (
             <tbody className="divide-y divide-med-border-subtle">
               {isEmpty && (
                 <tr>
                   <td
-                    colSpan={COLUMNS}
+                    colSpan={columns}
                     className="px-6 py-10 text-center text-med-text-muted"
                   >
                     {emptyMessage}
@@ -141,13 +161,24 @@ function AppointmentsTable({ items, isLoading, emptyMessage }) {
                   </td>
                   <td className="px-6 py-4">
                     <DetailLine
-                      title={appointment.patient.name || 'Sin nombre'}
+                      title={appointment.patient.name || 'Paciente'}
                       subtitle={`DNI: ${appointment.patient.dni}`}
                     />
                   </td>
                   <td className="px-6 py-4 text-center">
                     <AppointmentStatusBadge status={appointment.status} />
                   </td>
+                  {onViewDetail && (
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => onViewDetail(appointment)}
+                        className="text-xs font-semibold text-med-primary-700 hover:text-med-primary-900"
+                      >
+                        Ver Detalle
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
