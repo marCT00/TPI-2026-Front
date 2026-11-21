@@ -90,7 +90,7 @@ function SpecialtiesTable({
                       title="Eliminar especialidad"
                       aria-label={`Eliminar ${specialty.name}`}
                       onClick={() => onDelete(specialty)}
-                      className="p-1.5 rounded-lg text-med-text-muted hover:bg-red-50 hover:text-med-danger-text transition"
+                      className="p-1.5 rounded-lg text-med-danger-text hover:bg-red-50 transition"
                     >
                       <TrashIcon />
                     </button>
