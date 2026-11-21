@@ -2,20 +2,11 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Button from '../../shared/ui/atoms/Button';
 import Input from '../../shared/ui/atoms/Input';
-import {
-  EyeIcon,
-  EyeOffIcon,
-  LockIcon,
-  MailIcon,
-} from '../../shared/ui/atoms/icons';
+import { LockIcon, MailIcon } from '../../shared/ui/atoms/icons';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
+import PasswordInput from '../../shared/ui/molecules/PasswordInput';
 import { getErrorMessage } from '../../shared/api/parseBackendError';
 import { emailRules } from '../helpers/validationRules';
-
-const DEFAULT_TOGGLE_LABELS = {
-  show: 'Mostrar contraseña',
-  hide: 'Ocultar contraseña',
-};
 
 // Organismo de formulario de autenticación reutilizable para Admin y Paciente (OCP).
 function LoginForm({
@@ -37,13 +28,12 @@ function LoginForm({
     inputMode: secretInputMode,
     maxLength: secretMaxLength,
     leftIcon: secretLeftIcon = <LockIcon />,
-    toggleLabels = DEFAULT_TOGGLE_LABELS,
+    toggleLabels,
     rules: secretRules = {},
     numericOnly = false,
   } = secretField ?? {};
 
   const [submitError, setSubmitError] = useState('');
-  const [showSecret, setShowSecret] = useState(false);
 
   const {
     register,
@@ -55,7 +45,6 @@ function LoginForm({
   });
 
   const secretRegistration = register(secretName, secretRules);
-  const toggleLabel = showSecret ? toggleLabels.hide : toggleLabels.show;
 
   const handleSecretChange = (event) => {
     if (numericOnly) {
@@ -90,26 +79,15 @@ function LoginForm({
           {...register('email', emailRules)}
         />
 
-        <Input
+        <PasswordInput
           label={secretLabel}
-          type={showSecret ? 'text' : 'password'}
           inputMode={secretInputMode}
           autoComplete={secretAutoComplete}
           maxLength={secretMaxLength}
           placeholder={secretPlaceholder}
           hint={secretHint}
           leftIcon={secretLeftIcon}
-          rightSlot={
-            <button
-              type="button"
-              onClick={() => setShowSecret((current) => !current)}
-              aria-label={toggleLabel}
-              title={toggleLabel}
-              className="text-med-text-muted hover:text-med-text-main"
-            >
-              {showSecret ? <EyeOffIcon /> : <EyeIcon />}
-            </button>
-          }
+          toggleLabels={toggleLabels}
           error={errors[secretName]?.message}
           {...secretRegistration}
           onChange={handleSecretChange}

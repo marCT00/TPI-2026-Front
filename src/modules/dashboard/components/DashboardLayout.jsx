@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hook/useAuth';
 import { getDisplayName, getInitials } from '../../auth/helpers/userDisplay';
+import { LogoutIcon } from '../../shared/ui/atoms/icons';
 import ConfirmModal from '../../shared/ui/organisms/ConfirmModal';
 
 function DashboardLayout() {
@@ -149,19 +150,7 @@ function DashboardLayout() {
             onClick={() => setConfirmLogout(true)}
             className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-med-text-sub hover:text-red-600 hover:bg-red-50 rounded-lg transition"
           >
-            <svg
-              className="w-4 h-4 text-med-text-muted"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
+            <LogoutIcon className="w-4 h-4 text-med-text-muted" />
             <span>Cerrar Sesión</span>
           </button>
 
