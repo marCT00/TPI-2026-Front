@@ -32,8 +32,8 @@ const getSpecialityPlaceholder = (isLoading, hasOptions) => {
 // No conoce el backend: recibe las especialidades y onSubmit. Si el guardado
 // falla, la página marca el campo con setFieldError.
 function DoctorForm({
-  specialityOptions,
-  isLoadingSpecialities,
+  specialityOptions = [],
+  isLoadingSpecialities = false,
   submitError = '',
   onSubmit,
   onCancel,

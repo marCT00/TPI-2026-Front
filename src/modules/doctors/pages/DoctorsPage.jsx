@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/ui/atoms/Button';
 import Card from '../../shared/ui/atoms/Card';
-import { PlusIcon } from '../../shared/ui/atoms/icons';
+import { ClockIcon, PlusIcon } from '../../shared/ui/atoms/icons';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
 import SearchInput from '../../shared/ui/molecules/SearchInput';
 import TablePagination from '../../shared/ui/molecules/TablePagination';
@@ -70,6 +70,14 @@ function DoctorsPage() {
             onChange={list.changeSearch}
           />
           <Button
+            variant="secondary"
+            className="shrink-0"
+            onClick={() => navigate('/admin/doctors/availabilities')}
+          >
+            <ClockIcon />
+            Agregar Disponibilidad Horaria
+          </Button>
+          <Button
             className="shrink-0"
             onClick={() => navigate('/admin/doctors/new')}
           >
@@ -102,6 +110,9 @@ function DoctorsPage() {
           items={list.items}
           isLoading={list.isLoading}
           emptyMessage={emptyMessage}
+          onManageAvailability={(doctor) =>
+            navigate(`/admin/doctors/availabilities?doctorId=${doctor.id}`)
+          }
           onDelete={setToDelete}
         />
         <TablePagination
