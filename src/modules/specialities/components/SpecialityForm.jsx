@@ -9,14 +9,14 @@ import {
   NAME_LIMITS,
   descriptionRules,
   nameRules,
-} from '../helpers/specialtyRules';
-import SpecialtyStatusBadge from './SpecialtyStatusBadge';
+} from '../helpers/specialityRules';
+import SpecialityStatusBadge from './SpecialityStatusBadge';
 
 const EMPTY_VALUES = { name: '', description: '' };
 
 // Formulario de alta/edición. No conoce el backend: recibe onSubmit y, si
 // falla, la página le indica qué campo marcar mediante setFieldError.
-function SpecialtyForm({
+function SpecialityForm({
   defaultValues = EMPTY_VALUES,
   isActive = true,
   submitError = '',
@@ -67,7 +67,7 @@ function SpecialtyForm({
             Estado
           </span>
           <p className="flex items-center gap-2 text-xs text-med-text-sub">
-            <SpecialtyStatusBadge isActive={isActive} />
+            <SpecialityStatusBadge isActive={isActive} />
             {isActive && 'Disponible para programación'}
           </p>
         </div>
@@ -88,4 +88,4 @@ function SpecialtyForm({
   );
 }
 
-export default SpecialtyForm;
+export default SpecialityForm;

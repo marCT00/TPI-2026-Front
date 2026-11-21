@@ -8,10 +8,10 @@ import {
   getApiError,
   getErrorMessage,
 } from '../../shared/api/parseBackendError';
-import SpecialtyForm from '../components/SpecialtyForm';
-import useSpecialtyForm from '../hooks/useSpecialtyForm';
+import SpecialityForm from '../components/SpecialityForm';
+import useSpecialityForm from '../hooks/useSpecialityForm';
 
-const LIST_PATH = '/admin/specialties';
+const LIST_PATH = '/admin/specialities';
 
 // Errores del backend que corresponden a un campo puntual del formulario.
 const FIELD_ERRORS = {
@@ -29,12 +29,12 @@ const FIELD_ERRORS = {
   ],
 };
 
-function SpecialtyFormPage() {
+function SpecialityFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { isEdit, specialty, isLoading, loadError, save } =
-    useSpecialtyForm(id);
+  const { isEdit, speciality, isLoading, loadError, save } =
+    useSpecialityForm(id);
   const [submitError, setSubmitError] = useState('');
 
   const title = isEdit ? 'Editar Especialidad' : 'Registrar Nueva Especialidad';
@@ -79,7 +79,7 @@ function SpecialtyFormPage() {
 
   return (
     <section
-      aria-labelledby="specialty-form-title"
+      aria-labelledby="speciality-form-title"
       className="flex flex-col gap-6"
     >
       <header>
@@ -97,7 +97,7 @@ function SpecialtyFormPage() {
           </ol>
         </nav>
         <h1
-          id="specialty-form-title"
+          id="speciality-form-title"
           className="mt-2 text-2xl font-bold tracking-tight text-med-text-main"
         >
           {title}
@@ -123,14 +123,17 @@ function SpecialtyFormPage() {
         )}
 
         {!isLoading && !loadError && (
-          <SpecialtyForm
-            key={specialty?.id ?? 'new'}
+          <SpecialityForm
+            key={speciality?.id ?? 'new'}
             defaultValues={
-              specialty
-                ? { name: specialty.name, description: specialty.description }
+              speciality
+                ? {
+                    name: speciality.name,
+                    description: speciality.description,
+                  }
                 : undefined
             }
-            isActive={specialty?.isActive ?? true}
+            isActive={speciality?.isActive ?? true}
             submitError={submitError}
             submitLabel={isEdit ? 'Guardar Cambios' : 'Guardar Especialidad'}
             onSubmit={handleSubmit}
@@ -142,4 +145,4 @@ function SpecialtyFormPage() {
   );
 }
 
-export default SpecialtyFormPage;
+export default SpecialityFormPage;

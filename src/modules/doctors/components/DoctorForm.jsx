@@ -14,12 +14,12 @@ import {
   NAME_LIMITS,
   licenseRules,
   nameRules,
-  specialtyRules,
+  specialityRules,
 } from '../helpers/doctorRules';
 
-const EMPTY_VALUES = { name: '', specialtyId: '', licenseNumber: '' };
+const EMPTY_VALUES = { name: '', specialityId: '', licenseNumber: '' };
 
-const getSpecialtyPlaceholder = (isLoading, hasOptions) => {
+const getSpecialityPlaceholder = (isLoading, hasOptions) => {
   if (isLoading) {
     return 'Cargando especialidades...';
   }
@@ -32,8 +32,8 @@ const getSpecialtyPlaceholder = (isLoading, hasOptions) => {
 // No conoce el backend: recibe las especialidades y onSubmit. Si el guardado
 // falla, la página marca el campo con setFieldError.
 function DoctorForm({
-  specialtyOptions,
-  isLoadingSpecialties,
+  specialityOptions,
+  isLoadingSpecialities,
   submitError = '',
   onSubmit,
   onCancel,
@@ -45,7 +45,7 @@ function DoctorForm({
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues: EMPTY_VALUES, mode: 'onTouched' });
 
-  const hasOptions = specialtyOptions.length > 0;
+  const hasOptions = specialityOptions.length > 0;
 
   const onValid = (values) =>
     onSubmit(values, {
@@ -69,15 +69,15 @@ function DoctorForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Select
             label="Especialidad"
-            placeholder={getSpecialtyPlaceholder(
-              isLoadingSpecialties,
+            placeholder={getSpecialityPlaceholder(
+              isLoadingSpecialities,
               hasOptions
             )}
-            options={specialtyOptions}
-            disabled={isLoadingSpecialties || !hasOptions}
+            options={specialityOptions}
+            disabled={isLoadingSpecialities || !hasOptions}
             leftIcon={<StethoscopeIcon />}
-            error={errors.specialtyId?.message}
-            {...register('specialtyId', specialtyRules)}
+            error={errors.specialityId?.message}
+            {...register('specialityId', specialityRules)}
           />
 
           <Input

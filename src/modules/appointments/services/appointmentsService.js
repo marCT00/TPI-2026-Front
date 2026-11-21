@@ -20,9 +20,9 @@ const toAppointment = (raw) => ({
     id: raw.doctor?.doctorId ?? null,
     name: raw.doctor?.name ?? 'Sin médico',
   },
-  specialty: {
-    id: raw.doctor?.specialty?.specialtyId ?? null,
-    name: raw.doctor?.specialty?.name ?? 'Sin especialidad',
+  speciality: {
+    id: raw.doctor?.speciality?.specialityId ?? null,
+    name: raw.doctor?.speciality?.name ?? 'Sin especialidad',
   },
 });
 
@@ -39,7 +39,7 @@ const toSearchParams = ({ pageSize, pageIndex, filters }) => {
   return params;
 };
 
-// GET /api/appointments/search?pageSize&pageIndex&patientDni&doctorId&specialtyId&date
+// GET /api/appointments/search?pageSize&pageIndex&patientDni&doctorId&specialityId&date
 const searchAppointments = async (
   { pageSize = 10, pageIndex = 1, filters = {} } = {},
   { signal } = {}

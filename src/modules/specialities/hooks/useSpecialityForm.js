@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  createSpecialty,
-  getSpecialtyById,
-  updateSpecialty,
-} from '../services/specialtiesService';
+  createSpeciality,
+  getSpecialityById,
+  updateSpeciality,
+} from '../services/specialitiesService';
 
 // Resuelve el modo del formulario: con id → edición (precarga), sin id → alta.
-function useSpecialtyForm(id) {
+function useSpecialityForm(id) {
   const isEdit = Boolean(id);
-  const [specialty, setSpecialty] = useState(null);
+  const [speciality, setSpeciality] = useState(null);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [loadError, setLoadError] = useState(null);
 
@@ -22,8 +22,8 @@ function useSpecialtyForm(id) {
     setIsLoading(true);
     setLoadError(null);
 
-    getSpecialtyById(id)
-      .then((result) => isActive && setSpecialty(result))
+    getSpecialityById(id)
+      .then((result) => isActive && setSpeciality(result))
       .catch((error) => isActive && setLoadError(error))
       .finally(() => isActive && setIsLoading(false));
 
@@ -34,11 +34,11 @@ function useSpecialtyForm(id) {
 
   const save = useCallback(
     (values) =>
-      isEdit ? updateSpecialty(id, values) : createSpecialty(values),
+      isEdit ? updateSpeciality(id, values) : createSpeciality(values),
     [id, isEdit]
   );
 
-  return { isEdit, specialty, isLoading, loadError, save };
+  return { isEdit, speciality, isLoading, loadError, save };
 }
 
-export default useSpecialtyForm;
+export default useSpecialityForm;

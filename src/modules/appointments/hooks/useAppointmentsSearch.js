@@ -6,7 +6,7 @@ const PAGE_SIZE = 10;
 
 const EMPTY_FILTERS = {
   patientDni: '',
-  specialtyId: '',
+  specialityId: '',
   doctorId: '',
   date: '',
 };

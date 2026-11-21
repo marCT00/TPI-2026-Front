@@ -9,7 +9,7 @@ function OverviewPage() {
     {
       id: 1,
       name: 'Dr. James Wilson',
-      specialty: 'Cardiología',
+      speciality: 'Cardiología',
       status: 'Activo',
       statusType: 'active',
       avatar: '👨‍⚕️',
@@ -17,7 +17,7 @@ function OverviewPage() {
     {
       id: 2,
       name: 'Dr. Elena Rodriguez',
-      specialty: 'Neurología',
+      speciality: 'Neurología',
       status: 'Activo',
       statusType: 'active',
       avatar: '👩‍⚕️',
@@ -25,7 +25,7 @@ function OverviewPage() {
     {
       id: 3,
       name: 'Dr. Robert Chen',
-      specialty: 'Pediatría',
+      speciality: 'Pediatría',
       status: 'De Licencia',
       statusType: 'leave',
       avatar: '👨‍⚕️',
@@ -56,7 +56,7 @@ function OverviewPage() {
 
           <Button
             variant="secondary"
-            onClick={() => navigate('/admin/specialties')}
+            onClick={() => navigate('/admin/specialities')}
             className="flex items-center gap-2"
           >
             <span>+</span>
@@ -224,7 +224,7 @@ function OverviewPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-med-text-sub">
-                    {doc.specialty}
+                    {doc.speciality}
                   </td>
                   <td className="px-6 py-4">
                     {doc.statusType === 'active' ? (

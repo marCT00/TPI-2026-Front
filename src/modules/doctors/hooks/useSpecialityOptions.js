@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { getErrorMessage } from '../../shared/api/parseBackendError';
-import { getSpecialties } from '../../specialties/services/specialtiesService';
+import { getSpecialities } from '../../specialities/services/specialitiesService';
 
 // El select muestra todas las especialidades activas, no solo una página.
 const MAX_OPTIONS = 100;
 
-function useSpecialtyOptions() {
+function useSpecialityOptions() {
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -13,15 +13,15 @@ function useSpecialtyOptions() {
   useEffect(() => {
     const controller = new AbortController();
 
-    getSpecialties(
+    getSpecialities(
       { pageSize: MAX_OPTIONS, pageIndex: 1 },
       { signal: controller.signal }
     )
       .then((result) =>
         setOptions(
-          result.items.map((specialty) => ({
-            value: specialty.id,
-            label: specialty.name,
+          result.items.map((speciality) => ({
+            value: speciality.id,
+            label: speciality.name,
           }))
         )
       )
@@ -42,4 +42,4 @@ function useSpecialtyOptions() {
   return { options, isLoading, error };
 }
 
-export default useSpecialtyOptions;
+export default useSpecialityOptions;

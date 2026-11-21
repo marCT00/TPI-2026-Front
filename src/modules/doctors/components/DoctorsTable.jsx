@@ -25,7 +25,7 @@ function DoctorAvatar({ name }) {
   );
 }
 
-function SpecialtyTag({ name }) {
+function SpecialityTag({ name }) {
   return (
     <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-med-primary-100 text-med-primary-700 whitespace-nowrap">
       {name}
@@ -77,7 +77,7 @@ function DoctorsTable({ items, isLoading, emptyMessage, onDelete }) {
                       Licencia: {doctor.licenseNumber || '—'}
                     </p>
                     <div>
-                      <SpecialtyTag name={doctor.specialty.name} />
+                      <SpecialityTag name={doctor.speciality.name} />
                     </div>
                   </div>
                   {onDelete && (
@@ -141,7 +141,7 @@ function DoctorsTable({ items, isLoading, emptyMessage, onDelete }) {
                     </div>
                   </th>
                   <td className="px-6 py-4">
-                    <SpecialtyTag name={doctor.specialty.name} />
+                    <SpecialityTag name={doctor.speciality.name} />
                   </td>
                   <td className="px-6 py-4 text-right">
                     {onDelete && (

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { getErrorMessage } from '../../shared/api/parseBackendError';
 import { getDoctors } from '../../doctors/services/doctorsService';
-import { getSpecialties } from '../../specialties/services/specialtiesService';
+import { getSpecialities } from '../../specialities/services/specialitiesService';
 
 const MAX_OPTIONS = 100;
 
 // Especialidades y médicos activos para los selects de la búsqueda.
 function useFilterOptions() {
-  const [specialties, setSpecialties] = useState([]);
+  const [specialities, setSpecialities] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -17,19 +17,19 @@ function useFilterOptions() {
     const query = { pageSize: MAX_OPTIONS, pageIndex: 1 };
     const options = { signal: controller.signal };
 
-    Promise.all([getSpecialties(query, options), getDoctors(query, options)])
-      .then(([specialtiesResult, doctorsResult]) => {
-        setSpecialties(
-          specialtiesResult.items.map((specialty) => ({
-            value: specialty.id,
-            label: specialty.name,
+    Promise.all([getSpecialities(query, options), getDoctors(query, options)])
+      .then(([specialitiesResult, doctorsResult]) => {
+        setSpecialities(
+          specialitiesResult.items.map((speciality) => ({
+            value: speciality.id,
+            label: speciality.name,
           }))
         );
         setDoctors(
           doctorsResult.items.map((doctor) => ({
             value: doctor.id,
             label: doctor.name,
-            specialtyId: doctor.specialty.id,
+            specialityId: doctor.speciality.id,
           }))
         );
       })
@@ -47,7 +47,7 @@ function useFilterOptions() {
     return () => controller.abort();
   }, []);
 
-  return { specialties, doctors, isLoading, error };
+  return { specialities, doctors, isLoading, error };
 }
 
 export default useFilterOptions;

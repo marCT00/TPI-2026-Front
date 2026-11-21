@@ -53,7 +53,7 @@ function AppointmentsSearchPage() {
         <AppointmentFilters
           defaultValues={EMPTY_FILTERS}
           appliedFilters={search.filters}
-          specialties={options.specialties}
+          specialities={options.specialities}
           doctors={options.doctors}
           isLoadingOptions={options.isLoading}
           onApply={search.applyFilters}

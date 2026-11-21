@@ -7,7 +7,7 @@ function PatientHome() {
   const navigate = useNavigate();
 
   // Estados de selección de filtros
-  const [selectedSpecialty, setSelectedSpecialty] = useState('Cardiología');
+  const [selectedSpeciality, setSelectedSpeciality] = useState('Cardiología');
   const [selectedDoctorId, setSelectedDoctorId] = useState('doc-1');
 
   // Médicos disponibles
@@ -15,8 +15,8 @@ function PatientHome() {
     {
       id: 'doc-1',
       name: 'Dr. Alejandro Martínez',
-      specialty: 'Cardiología',
-      specialtyDetail: 'Cardiología Intervencionista',
+      speciality: 'Cardiología',
+      specialityDetail: 'Cardiología Intervencionista',
       clinic: 'Clínica San Rafael • Sede Central Consultorio 402',
       badge: 'Verificado',
       avatar: '👨‍⚕️',
@@ -24,8 +24,8 @@ function PatientHome() {
     {
       id: 'doc-2',
       name: 'Dra. Elena Martínez',
-      specialty: 'Pediatría',
-      specialtyDetail: 'Pediatría Avanzada',
+      speciality: 'Pediatría',
+      specialityDetail: 'Pediatría Avanzada',
       clinic: 'Clínica San Rafael • Consultorio 104',
       badge: 'Verificado',
       avatar: '👩‍⚕️',
@@ -33,8 +33,8 @@ function PatientHome() {
     {
       id: 'doc-3',
       name: 'Dr. Marcos Torres',
-      specialty: 'Neurología',
-      specialtyDetail: 'Neurocirugía Clínica',
+      speciality: 'Neurología',
+      specialityDetail: 'Neurocirugía Clínica',
       clinic: 'Clínica San Rafael • Consultorio 202',
       badge: 'Verificado',
       avatar: '👨‍⚕️',
@@ -108,8 +108,8 @@ function PatientHome() {
             </label>
             <div className="relative">
               <select
-                value={selectedSpecialty}
-                onChange={(e) => setSelectedSpecialty(e.target.value)}
+                value={selectedSpeciality}
+                onChange={(e) => setSelectedSpeciality(e.target.value)}
                 className="w-full appearance-none px-3.5 py-2.5 text-sm bg-white border border-med-border rounded-lg text-med-text-main focus:outline-none focus:ring-2 focus:ring-med-primary-600 pr-10 cursor-pointer"
               >
                 <option value="Cardiología">Cardiología</option>
@@ -192,7 +192,7 @@ function PatientHome() {
             </span>
           </div>
           <p className="text-xs sm:text-sm font-semibold uppercase sm:normal-case tracking-wide sm:tracking-normal text-med-primary-700 sm:text-med-text-sub mt-0.5">
-            {currentDoctor.specialtyDetail}
+            {currentDoctor.specialityDetail}
           </p>
           <p className="text-xs text-med-text-muted mt-0.5 truncate">
             {currentDoctor.clinic}
@@ -455,7 +455,7 @@ function PatientHome() {
 
             <div className="mt-5 p-3.5 bg-med-primary-50 border border-med-primary-200/60 rounded-xl text-xs text-med-primary-900 text-left space-y-1">
               <p>
-                <strong>Especialidad:</strong> {currentDoctor.specialtyDetail}
+                <strong>Especialidad:</strong> {currentDoctor.specialityDetail}
               </p>
               <p>
                 <strong>Lugar:</strong> {currentDoctor.clinic}

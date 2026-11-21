@@ -12,11 +12,11 @@ const findLabel = (options, value) =>
 const formatDate = (value) => value.split('-').reverse().join('/');
 
 // Etiquetas con los filtros que se están aplicando en la búsqueda.
-const getActiveChips = (filters, specialties, doctors) =>
+const getActiveChips = (filters, specialities, doctors) =>
   [
     filters.patientDni && `DNI: ${filters.patientDni}`,
-    filters.specialtyId &&
-      `Especialidad: ${findLabel(specialties, filters.specialtyId)}`,
+    filters.specialityId &&
+      `Especialidad: ${findLabel(specialities, filters.specialityId)}`,
     filters.doctorId && `Doctor: ${findLabel(doctors, filters.doctorId)}`,
     filters.date && `Fecha: ${formatDate(filters.date)}`,
   ].filter(Boolean);
@@ -24,7 +24,7 @@ const getActiveChips = (filters, specialties, doctors) =>
 function AppointmentFilters({
   defaultValues,
   appliedFilters,
-  specialties,
+  specialities,
   doctors,
   isLoadingOptions,
   onApply,
@@ -40,9 +40,9 @@ function AppointmentFilters({
     formState: { errors },
   } = useForm({ defaultValues, mode: 'onTouched' });
 
-  const selectedSpecialty = watch('specialtyId');
-  const doctorOptions = selectedSpecialty
-    ? doctors.filter((doctor) => doctor.specialtyId === selectedSpecialty)
+  const selectedSpeciality = watch('specialityId');
+  const doctorOptions = selectedSpeciality
+    ? doctors.filter((doctor) => doctor.specialityId === selectedSpeciality)
     : doctors;
 
   // Si el médico elegido no pertenece a la nueva especialidad, se limpia.
@@ -53,14 +53,14 @@ function AppointmentFilters({
 
     if (
       doctor &&
-      selectedSpecialty &&
-      doctor.specialtyId !== selectedSpecialty
+      selectedSpeciality &&
+      doctor.specialityId !== selectedSpeciality
     ) {
       setValue('doctorId', '');
     }
-  }, [selectedSpecialty, doctors, getValues, setValue]);
+  }, [selectedSpeciality, doctors, getValues, setValue]);
 
-  const chips = getActiveChips(appliedFilters, specialties, doctors);
+  const chips = getActiveChips(appliedFilters, specialities, doctors);
 
   const handleClear = () => {
     reset(defaultValues);
@@ -85,9 +85,9 @@ function AppointmentFilters({
         <Select
           label="Especialidad"
           placeholder="Todas las Especialidades"
-          options={specialties}
+          options={specialities}
           disabled={isLoadingOptions}
-          {...register('specialtyId')}
+          {...register('specialityId')}
         />
 
         <Select

@@ -6,16 +6,16 @@ const toDoctor = (raw) => ({
   id: raw.id,
   name: raw.name,
   licenseNumber: raw.licenseNumber ?? '',
-  specialty: {
-    id: raw.specialty?.id ?? null,
-    name: raw.specialty?.name ?? 'Sin especialidad',
+  speciality: {
+    id: raw.speciality?.id ?? null,
+    name: raw.speciality?.name ?? 'Sin especialidad',
   },
 });
 
-const toRequest = ({ name, licenseNumber, specialtyId }) => ({
+const toRequest = ({ name, licenseNumber, specialityId }) => ({
   name: name.trim(),
   licenseNumber: licenseNumber.trim(),
-  specialtyId,
+  specialityId,
 });
 
 // GET /api/doctors?pageSize&pageIndex&name

@@ -4,11 +4,11 @@ import {
   StethoscopeIcon,
   TrashIcon,
 } from '../../shared/ui/atoms/icons';
-import SpecialtyStatusBadge from './SpecialtyStatusBadge';
+import SpecialityStatusBadge from './SpecialityStatusBadge';
 
 const COLUMNS = 4;
 
-function SpecialtiesTable({
+function SpecialitiesTable({
   items,
   isLoading,
   emptyMessage,
@@ -51,9 +51,9 @@ function SpecialtiesTable({
               </tr>
             )}
 
-            {items.map((specialty) => (
+            {items.map((speciality) => (
               <tr
-                key={specialty.id}
+                key={speciality.id}
                 className="hover:bg-gray-50/70 transition-colors"
               >
                 <th scope="row" className="px-6 py-4 font-normal">
@@ -62,25 +62,25 @@ function SpecialtiesTable({
                       <StethoscopeIcon className="w-5 h-5" strokeWidth={1.75} />
                     </span>
                     <span className="font-semibold text-med-primary-900">
-                      {specialty.name}
+                      {speciality.name}
                     </span>
                   </div>
                 </th>
                 <td className="px-6 py-4 text-med-text-sub min-w-56 max-w-md">
-                  <p className="line-clamp-2" title={specialty.description}>
-                    {specialty.description}
+                  <p className="line-clamp-2" title={speciality.description}>
+                    {speciality.description}
                   </p>
                 </td>
                 <td className="px-6 py-4 text-center">
-                  <SpecialtyStatusBadge isActive={specialty.isActive} />
+                  <SpecialityStatusBadge isActive={speciality.isActive} />
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button
                       type="button"
                       title="Editar especialidad"
-                      aria-label={`Editar ${specialty.name}`}
-                      onClick={() => onEdit(specialty)}
+                      aria-label={`Editar ${speciality.name}`}
+                      onClick={() => onEdit(speciality)}
                       className="p-1.5 rounded-lg text-med-text-muted hover:bg-med-primary-50 hover:text-med-primary-900 transition"
                     >
                       <PencilIcon />
@@ -88,8 +88,8 @@ function SpecialtiesTable({
                     <button
                       type="button"
                       title="Eliminar especialidad"
-                      aria-label={`Eliminar ${specialty.name}`}
-                      onClick={() => onDelete(specialty)}
+                      aria-label={`Eliminar ${speciality.name}`}
+                      onClick={() => onDelete(speciality)}
                       className="p-1.5 rounded-lg text-med-text-muted hover:bg-red-50 hover:text-med-danger-text transition"
                     >
                       <TrashIcon />
@@ -105,4 +105,4 @@ function SpecialtiesTable({
   );
 }
 
-export default SpecialtiesTable;
+export default SpecialitiesTable;

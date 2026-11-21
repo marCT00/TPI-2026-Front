@@ -26,8 +26,14 @@ const licenseRules = {
   },
 };
 
-const specialtyRules = {
+const specialityRules = {
   required: 'Seleccioná una especialidad',
 };
 
-export { NAME_LIMITS, LICENSE_LIMITS, nameRules, licenseRules, specialtyRules };
+export {
+  NAME_LIMITS,
+  LICENSE_LIMITS,
+  nameRules,
+  licenseRules,
+  specialityRules,
+};

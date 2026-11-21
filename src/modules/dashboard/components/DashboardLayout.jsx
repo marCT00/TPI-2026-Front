@@ -56,7 +56,7 @@ function DashboardLayout() {
       ),
     },
     {
-      to: '/admin/specialties',
+      to: '/admin/specialities',
       label: 'Especialidades',
       icon: (
         <svg

@@ -9,7 +9,7 @@ import {
   getErrorMessage,
 } from '../../shared/api/parseBackendError';
 import DoctorForm from '../components/DoctorForm';
-import useSpecialtyOptions from '../hooks/useSpecialtyOptions';
+import useSpecialityOptions from '../hooks/useSpecialityOptions';
 import { createDoctor } from '../services/doctorsService';
 
 const LIST_PATH = '/admin/doctors';
@@ -29,7 +29,7 @@ const FIELD_ERRORS = {
     'El nombre debe tener entre 3 y 100 caracteres.',
   ],
   ENTITY_NOTFOUND: [
-    'specialtyId',
+    'specialityId',
     'La especialidad seleccionada ya no está disponible.',
   ],
 };
@@ -37,7 +37,7 @@ const FIELD_ERRORS = {
 function DoctorFormPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const specialties = useSpecialtyOptions();
+  const specialities = useSpecialityOptions();
   const [submitError, setSubmitError] = useState('');
 
   const handleSubmit = async (values, { setFieldError }) => {
@@ -102,15 +102,15 @@ function DoctorFormPage() {
         </header>
 
         <div className="p-6 flex flex-col gap-5">
-          {specialties.error && (
+          {specialities.error && (
             <AlertBanner title="No se pudieron cargar las especialidades">
-              {specialties.error}
+              {specialities.error}
             </AlertBanner>
           )}
 
           <DoctorForm
-            specialtyOptions={specialties.options}
-            isLoadingSpecialties={specialties.isLoading}
+            specialityOptions={specialities.options}
+            isLoadingSpecialities={specialities.isLoading}
             submitError={submitError}
             onSubmit={handleSubmit}
             onCancel={() => navigate(LIST_PATH)}

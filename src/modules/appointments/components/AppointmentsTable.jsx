@@ -73,7 +73,7 @@ function AppointmentsTable({ items, isLoading, emptyMessage }) {
                   </header>
                   <div>
                     <DetailLine
-                      title={appointment.specialty.name}
+                      title={appointment.speciality.name}
                       subtitle={appointment.doctor.name}
                     />
                   </div>
@@ -135,7 +135,7 @@ function AppointmentsTable({ items, isLoading, emptyMessage }) {
                   </th>
                   <td className="px-6 py-4">
                     <DetailLine
-                      title={appointment.specialty.name}
+                      title={appointment.speciality.name}
                       subtitle={appointment.doctor.name}
                     />
                   </td>
