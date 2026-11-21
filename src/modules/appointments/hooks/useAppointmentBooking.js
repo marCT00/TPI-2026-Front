@@ -268,6 +268,9 @@ function useAppointmentBooking() {
       try {
         const created = await createAppointment({
           doctorId: selectedDoctorId,
+          doctorName: currentDoctor?.name,
+          specialityId: currentDoctor?.speciality?.id,
+          specialityName: currentDoctor?.speciality?.name,
           availabilitySlotId: selectedSlot.id,
           patientDni: user.dni,
           reason,

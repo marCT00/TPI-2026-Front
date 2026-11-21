@@ -1,90 +1,141 @@
-import Card from '../../shared/ui/atoms/Card';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import usePatientAppointments from '../../appointments/hooks/usePatientAppointments';
+import { getErrorMessage } from '../../shared/api/parseBackendError';
 import Button from '../../shared/ui/atoms/Button';
+import Card from '../../shared/ui/atoms/Card';
+import { PlusIcon } from '../../shared/ui/atoms/icons';
+import AlertBanner from '../../shared/ui/molecules/AlertBanner';
+import ListSkeleton from '../../shared/ui/molecules/ListSkeleton';
+import ConfirmModal from '../../shared/ui/organisms/ConfirmModal';
+import useToast from '../../shared/ui/organisms/toast/useToast';
+import PatientAppointmentCard from '../components/PatientAppointmentCard';
+
+const CANCEL_ERROR_MESSAGES = {
+  APPOINTMENT_ALREADY_CANCELLED: 'Este turno ya fue cancelado anteriormente.',
+};
 
 function AppointmentsPage() {
-  const sampleAppointments = [
-    {
-      id: 1,
-      doctor: 'Dra. María González',
-      speciality: 'Cardiología',
-      date: '2026-10-28',
-      time: '10:30 hs',
-      status: 'Confirmado',
-    },
-    {
-      id: 2,
-      doctor: 'Dr. Lucas Fernández',
-      speciality: 'Traumatología',
-      date: '2026-11-05',
-      time: '15:00 hs',
-      status: 'Pendiente',
-    },
-  ];
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const { items, isLoading, error, refresh, cancelById } =
+    usePatientAppointments();
+  const [toCancel, setToCancel] = useState(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const confirmCancel = async () => {
+    if (!toCancel) {
+      return;
+    }
+
+    setIsCancelling(true);
+
+    try {
+      await cancelById(toCancel.id);
+      showToast({
+        variant: 'success',
+        message: 'El turno fue cancelado y el horario quedó disponible.',
+      });
+      setToCancel(null);
+    } catch (requestError) {
+      showToast({
+        variant: 'error',
+        message: getErrorMessage(requestError, CANCEL_ERROR_MESSAGES),
+      });
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <section
+      aria-labelledby="patient-appointments-title"
+      className="flex flex-col gap-6"
+    >
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-med-text-main">
+          <h1
+            id="patient-appointments-title"
+            className="text-2xl sm:text-3xl font-bold tracking-tight text-med-text-main"
+          >
             Mis Turnos Médicos
           </h1>
           <p className="text-sm text-med-text-sub mt-1">
             Consulta y gestiona las citas médicas programadas.
           </p>
         </div>
-        <Button onClick={() => alert('Función de nuevo turno próximamente')}>
-          + Solicitar Nuevo Turno
-        </Button>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {sampleAppointments.map((appt) => (
-          <Card
-            key={appt.id}
-            className="flex flex-col justify-between gap-4 p-6"
+        <Button onClick={() => navigate('/')}>
+          <PlusIcon />
+          Solicitar Nuevo Turno
+        </Button>
+      </header>
+
+      {error && (
+        <AlertBanner title="No se pudieron cargar tus turnos">
+          {error}{' '}
+          <button
+            type="button"
+            onClick={refresh}
+            className="font-semibold underline"
           >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-med-primary-100 text-med-primary-700">
-                  {appt.speciality}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${appt.status === 'Confirmado'
-                      ? 'bg-med-active-bg text-med-active-text'
-                      : 'bg-med-leave-bg text-med-leave-text'
-                    }`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                  {appt.status}
-                </span>
-              </div>
-              <h3 className="text-lg font-bold text-med-primary-900">
-                {appt.doctor}
-              </h3>
-              <p className="text-sm text-med-text-sub mt-2">
-                Fecha:{' '}
-                <strong className="text-med-text-main font-semibold">
-                  {appt.date}
-                </strong>{' '}
-                a las{' '}
-                <strong className="text-med-text-main font-semibold">
-                  {appt.time}
-                </strong>
-              </p>
-            </div>
-            <div className="flex gap-2 pt-3 border-t border-med-border">
-              <Button
-                variant="outline"
-                className="w-full text-xs"
-                onClick={() => alert(`Cancelando turno ${appt.id}`)}
-              >
-                Cancelar Turno
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
+            Reintentar
+          </button>
+        </AlertBanner>
+      )}
+
+      {isLoading && (
+        <Card className="p-0 overflow-hidden">
+          <ListSkeleton />
+        </Card>
+      )}
+
+      {!isLoading && !error && items.length === 0 && (
+        <Card as="article" className="p-10 text-center flex flex-col items-center gap-3">
+          <h2 className="text-base font-bold text-med-primary-900">
+            No tenés turnos activos programados
+          </h2>
+          <p className="text-xs text-med-text-sub max-w-md">
+            Podés consultar la disponibilidad de nuestros profesionales y
+            reservar una nueva cita en cualquier momento.
+          </p>
+          <Button className="mt-1" onClick={() => navigate('/')}>
+            <PlusIcon />
+            Reservar un Turno
+          </Button>
+        </Card>
+      )}
+
+      {!isLoading && items.length > 0 && (
+        <ul
+          aria-label="Turnos médicos activos"
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+        >
+          {items.map((appointment) => (
+            <li key={appointment.id}>
+              <PatientAppointmentCard
+                appointment={appointment}
+                onCancel={setToCancel}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <ConfirmModal
+        open={Boolean(toCancel)}
+        title="¿Cancelar turno médico?"
+        message={
+          toCancel
+            ? `Vas a cancelar tu turno con ${toCancel.doctor.name} del ${toCancel.date} a las ${toCancel.startTime} hs. El horario quedará disponible para otros pacientes.`
+            : ''
+        }
+        confirmLabel="Sí, cancelar turno"
+        isLoading={isCancelling}
+        onConfirm={confirmCancel}
+        onCancel={() => setToCancel(null)}
+      />
+    </section>
   );
 }
 
