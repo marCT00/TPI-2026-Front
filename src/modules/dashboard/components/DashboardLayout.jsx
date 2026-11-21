@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hook/useAuth';
 import { getDisplayName, getInitials } from '../../auth/helpers/userDisplay';
-import { LogoutIcon } from '../../shared/ui/atoms/icons';
+import { LogoutIcon, ShieldCheckIcon } from '../../shared/ui/atoms/icons';
 import ConfirmModal from '../../shared/ui/organisms/ConfirmModal';
 
 function DashboardLayout() {
@@ -188,10 +188,10 @@ function DashboardLayout() {
         <header className="sm:hidden bg-white border-b border-med-border px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-med-primary-900 text-white flex items-center justify-center font-bold text-xs">
-              MC
+              <ShieldCheckIcon className="w-4 h-4" />
             </div>
             <span className="font-bold text-sm text-med-primary-900">
-              Medical Center
+              Admin Portal
             </span>
           </div>
           <button
