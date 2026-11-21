@@ -5,7 +5,7 @@ import { parseBackendError } from './parseBackendError';
 const AUTH_ENDPOINT_PREFIX = 'api/auth/';
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL: import.meta.env.DEV ? '/' : import.meta.env.VITE_BACKEND_URL,
 });
 
 instance.interceptors.request.use((config) => {
