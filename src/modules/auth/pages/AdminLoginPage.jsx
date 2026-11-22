@@ -1,14 +1,9 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import Button from '../../shared/ui/atoms/Button';
-import Input from '../../shared/ui/atoms/Input';
-import { MailIcon, ShieldCheckIcon } from '../../shared/ui/atoms/icons';
+import { LockIcon, ShieldCheckIcon } from '../../shared/ui/atoms/icons';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
-import PasswordInput from '../../shared/ui/molecules/PasswordInput';
-import { getErrorMessage } from '../../shared/api/parseBackendError';
 import AuthPageTemplate from '../components/AuthPageTemplate';
+import LoginForm from '../components/LoginForm';
 import useAuth from '../hook/useAuth';
-import { adminPasswordRules, emailRules } from '../helpers/validationRules';
+import { adminPasswordRules } from '../helpers/validationRules';
 
 const LOGIN_ERROR_MESSAGES = {
   401: 'Email o contraseña incorrectos.',
@@ -16,28 +11,21 @@ const LOGIN_ERROR_MESSAGES = {
   AUTHORIZATION_FAILED: 'Esta cuenta no tiene acceso al portal administrativo.',
 };
 
+const SECRET_FIELD = {
+  name: 'password',
+  label: 'Contraseña',
+  placeholder: '••••••••',
+  autoComplete: 'current-password',
+  leftIcon: <LockIcon />,
+  toggleLabels: {
+    show: 'Mostrar contraseña',
+    hide: 'Ocultar contraseña',
+  },
+  rules: adminPasswordRules,
+};
+
 function AdminLoginPage() {
-  const [submitError, setSubmitError] = useState('');
   const { signinAdmin } = useAuth();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    defaultValues: { email: '', password: '' },
-    mode: 'onTouched',
-  });
-
-  // La redirección tras el login la resuelve GuestRoute al detectar la sesión.
-  const onValid = async (formData) => {
-    setSubmitError('');
-
-    try {
-      await signinAdmin(formData);
-    } catch (error) {
-      setSubmitError(getErrorMessage(error, LOGIN_ERROR_MESSAGES));
-    }
-  };
 
   return (
     <AuthPageTemplate
@@ -58,48 +46,25 @@ function AdminLoginPage() {
         </aside>
       }
     >
-      <form noValidate onSubmit={handleSubmit(onValid)}>
-        <fieldset disabled={isSubmitting} className="flex flex-col gap-4">
-          <legend className="sr-only">Credenciales de administrador</legend>
-
-          <Input
-            label="Correo Electrónico"
-            type="email"
-            autoComplete="username"
-            placeholder="admin@system.com"
-            leftIcon={<MailIcon />}
-            error={errors.email?.message}
-            {...register('email', emailRules)}
-          />
-
-          <PasswordInput
-            label="Contraseña"
-            autoComplete="current-password"
-            placeholder="••••••••"
-            error={errors.password?.message}
-            {...register('password', adminPasswordRules)}
-          />
-
-          {submitError && <AlertBanner>{submitError}</AlertBanner>}
-
-          <Button
-            type="submit"
-            className="mt-2 w-full"
-            isLoading={isSubmitting}
-          >
-            Iniciar Sesión →
-          </Button>
-
-          {import.meta.env.DEV && (
+      <LoginForm
+        legend="Credenciales de administrador"
+        emailPlaceholder="admin@system.com"
+        emailAutoComplete="username"
+        secretField={SECRET_FIELD}
+        submitLabel="Iniciar Sesión →"
+        errorMessages={LOGIN_ERROR_MESSAGES}
+        onSubmit={signinAdmin}
+        footer={
+          import.meta.env.DEV && (
             <AlertBanner variant="info" className="justify-center text-center">
               <span className="font-semibold">Credenciales de prueba:</span>
               <br />
               Email: <code>admin@system.com</code> | Clave:{' '}
               <code>Admin123!</code>
             </AlertBanner>
-          )}
-        </fieldset>
-      </form>
+          )
+        }
+      />
     </AuthPageTemplate>
   );
 }

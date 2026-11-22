@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import Button from '../../shared/ui/atoms/Button';
 import Input from '../../shared/ui/atoms/Input';
 import Select from '../../shared/ui/atoms/Select';
-import { SearchIcon } from '../../shared/ui/atoms/icons';
+import { CloseIcon, SearchIcon } from '../../shared/ui/atoms/icons';
 import { DNI_LIMITS, patientDniRules } from '../helpers/appointmentFilterRules';
 
 const findLabel = (options, value) =>
@@ -12,21 +12,32 @@ const findLabel = (options, value) =>
 const formatDate = (value) => value.split('-').reverse().join('/');
 
 // Etiquetas con los filtros que se están aplicando en la búsqueda.
-const getActiveChips = (filters, specialities, doctors) =>
+const getActiveChips = (filters = {}, specialities = [], doctors = []) =>
   [
-    filters.patientDni && `DNI: ${filters.patientDni}`,
-    filters.specialityId &&
-      `Especialidad: ${findLabel(specialities, filters.specialityId)}`,
-    filters.doctorId && `Doctor: ${findLabel(doctors, filters.doctorId)}`,
-    filters.date && `Fecha: ${formatDate(filters.date)}`,
+    filters.patientDni && {
+      key: 'patientDni',
+      label: `DNI: ${filters.patientDni}`,
+    },
+    filters.specialityId && {
+      key: 'specialityId',
+      label: `Especialidad: ${findLabel(specialities, filters.specialityId)}`,
+    },
+    filters.doctorId && {
+      key: 'doctorId',
+      label: `Doctor: ${findLabel(doctors, filters.doctorId)}`,
+    },
+    filters.date && {
+      key: 'date',
+      label: `Fecha: ${formatDate(filters.date)}`,
+    },
   ].filter(Boolean);
 
 function AppointmentFilters({
   defaultValues,
   appliedFilters,
-  specialities,
-  doctors,
-  isLoadingOptions,
+  specialities = [],
+  doctors = [],
+  isLoadingOptions = false,
   onApply,
   onClear,
 }) {
@@ -65,6 +76,11 @@ function AppointmentFilters({
   const handleClear = () => {
     reset(defaultValues);
     onClear();
+  };
+
+  const handleRemoveChip = (fieldKey) => {
+    setValue(fieldKey, '');
+    onApply({ ...appliedFilters, [fieldKey]: '' });
   };
 
   return (
@@ -120,10 +136,19 @@ function AppointmentFilters({
         >
           {chips.map((chip) => (
             <li
-              key={chip}
-              className="px-3 py-1 rounded-full text-xs font-semibold bg-med-primary-100 text-med-primary-700"
+              key={chip.key}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-med-primary-100 text-med-primary-700"
             >
-              {chip}
+              <span>{chip.label}</span>
+              <button
+                type="button"
+                aria-label={`Quitar filtro ${chip.label}`}
+                title={`Quitar filtro ${chip.label}`}
+                onClick={() => handleRemoveChip(chip.key)}
+                className="hover:text-med-primary-900 transition"
+              >
+                <CloseIcon className="w-3.5 h-3.5" />
+              </button>
             </li>
           ))}
         </ul>

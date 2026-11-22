@@ -97,6 +97,11 @@ function SpecialitiesPage() {
       )}
 
       <Card as="article" className="p-0 overflow-hidden">
+        <header className="p-5 border-b border-med-border">
+          <h2 className="text-base font-bold text-med-primary-900">
+            Registros de Especialidades
+          </h2>
+        </header>
         <SpecialitiesTable
           items={list.items}
           isLoading={list.isLoading}
