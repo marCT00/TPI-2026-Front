@@ -110,6 +110,7 @@ function DoctorsPage() {
           items={list.items}
           isLoading={list.isLoading}
           emptyMessage={emptyMessage}
+          onEdit={(doctor) => navigate(`/admin/doctors/${doctor.id}/edit`)}
           onManageAvailability={(doctor) =>
             navigate(`/admin/doctors/availabilities?doctorId=${doctor.id}`)
           }
