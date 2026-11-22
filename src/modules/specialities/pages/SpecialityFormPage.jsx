@@ -29,6 +29,11 @@ const FIELD_ERRORS = {
   ],
 };
 
+const toFormValues = (speciality) => ({
+  name: speciality.name,
+  description: speciality.description,
+});
+
 function SpecialityFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -125,14 +130,7 @@ function SpecialityFormPage() {
         {!isLoading && !loadError && (
           <SpecialityForm
             key={speciality?.id ?? 'new'}
-            defaultValues={
-              speciality
-                ? {
-                    name: speciality.name,
-                    description: speciality.description,
-                  }
-                : undefined
-            }
+            defaultValues={speciality ? toFormValues(speciality) : undefined}
             isActive={speciality?.isActive ?? true}
             submitError={submitError}
             submitLabel={isEdit ? 'Guardar Cambios' : 'Guardar Especialidad'}
