@@ -1,6 +1,6 @@
 import ListSkeleton from '../../shared/ui/molecules/ListSkeleton';
 import TableSkeleton from '../../shared/ui/molecules/TableSkeleton';
-import { ClockIcon, TrashIcon } from '../../shared/ui/atoms/icons';
+import { ClockIcon, PencilIcon, TrashIcon } from '../../shared/ui/atoms/icons';
 
 const COLUMNS = 3;
 const TITLE_PREFIX = /^(dr|dra)\.?\s+/i;
@@ -33,13 +33,24 @@ function SpecialityTag({ name }) {
   );
 }
 
-function RowActions({ doctor, onManageAvailability, onDelete }) {
-  if (!onManageAvailability && !onDelete) {
+function RowActions({ doctor, onEdit, onManageAvailability, onDelete }) {
+  if (!onEdit && !onManageAvailability && !onDelete) {
     return null;
   }
 
   return (
     <div className="flex items-center justify-end gap-2 shrink-0">
+      {onEdit && (
+        <button
+          type="button"
+          title="Editar doctor"
+          aria-label={`Editar ${doctor.name}`}
+          onClick={() => onEdit(doctor)}
+          className="p-1.5 rounded-lg text-med-text-muted hover:bg-med-primary-50 hover:text-med-primary-900 transition"
+        >
+          <PencilIcon />
+        </button>
+      )}
       {onManageAvailability && (
         <button
           type="button"
@@ -71,6 +82,7 @@ function DoctorsTable({
   items,
   isLoading,
   emptyMessage,
+  onEdit,
   onManageAvailability,
   onDelete,
 }) {
@@ -107,6 +119,7 @@ function DoctorsTable({
                   </div>
                   <RowActions
                     doctor={doctor}
+                    onEdit={onEdit}
                     onManageAvailability={onManageAvailability}
                     onDelete={onDelete}
                   />
@@ -173,6 +186,7 @@ function DoctorsTable({
                   <td className="px-6 py-4 text-right">
                     <RowActions
                       doctor={doctor}
+                      onEdit={onEdit}
                       onManageAvailability={onManageAvailability}
                       onDelete={onDelete}
                     />
