@@ -91,7 +91,10 @@ function AppointmentsPage() {
       )}
 
       {!isLoading && !error && items.length === 0 && (
-        <Card as="article" className="p-10 text-center flex flex-col items-center gap-3">
+        <Card
+          as="article"
+          className="p-10 text-center flex flex-col items-center gap-3"
+        >
           <h2 className="text-base font-bold text-med-primary-900">
             No tenés turnos activos programados
           </h2>

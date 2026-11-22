@@ -148,10 +148,13 @@ const fetchRawAvailabilities = async (
     params.month = month;
   }
 
-  const { data } = await instance.get(`api/doctors/${doctorId}/availabilities`, {
-    params,
-    signal,
-  });
+  const { data } = await instance.get(
+    `api/doctors/${doctorId}/availabilities`,
+    {
+      params,
+      signal,
+    }
+  );
 
   if (Array.isArray(data)) {
     return data;

@@ -70,8 +70,7 @@ function useAppointmentBooking() {
         const matchingDocs = initialSpecId
           ? docItems.filter((doc) => doc.speciality.id === initialSpecId)
           : docItems;
-        const initialDocId =
-          matchingDocs[0]?.id ?? docItems[0]?.id ?? '';
+        const initialDocId = matchingDocs[0]?.id ?? docItems[0]?.id ?? '';
 
         setSelectedSpecialityId(
           matchingDocs[0]?.speciality?.id ?? initialSpecId
@@ -125,7 +124,11 @@ function useAppointmentBooking() {
     setIsLoadingSlots(true);
     setSlotsError('');
 
-    getDoctorAvailabilitySlots(selectedDoctorId, {}, { signal: controller.signal })
+    getDoctorAvailabilitySlots(
+      selectedDoctorId,
+      {},
+      { signal: controller.signal }
+    )
       .then((rawSlots) => {
         setSlots(rawSlots);
         const grouped = groupFutureSlotsByDate(rawSlots);
