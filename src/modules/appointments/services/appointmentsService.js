@@ -1,39 +1,6 @@
 import { instance } from '../../shared/api/axiosInstance';
 
 const APPOINTMENTS_ENDPOINT = 'api/appointments';
-const META_STORAGE_KEY = 'medportal.appointments.meta';
-
-const readMetadataMap = () => {
-  try {
-    const raw = localStorage.getItem(META_STORAGE_KEY);
-
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-};
-
-const saveAppointmentMetadata = (id, turnId, meta) => {
-  if (!meta?.doctorName && !meta?.specialityName) {
-    return;
-  }
-
-  try {
-    const current = readMetadataMap();
-
-    if (id) {
-      current[id] = meta;
-    }
-
-    if (turnId) {
-      current[turnId] = meta;
-    }
-
-    localStorage.setItem(META_STORAGE_KEY, JSON.stringify(current));
-  } catch {
-    // Si localStorage no está disponible, se continúa sin caché local.
-  }
-};
 
 // "09:30:00" -> "09:30"
 const toShortTime = (value) => String(value ?? '').slice(0, 5);
@@ -47,8 +14,6 @@ const toAppointment = (raw = {}) => {
     raw.specialty ??
     {};
   const turnId = raw.turnId ?? raw.availabilitySlotId ?? null;
-  const metaMap = readMetadataMap();
-  const cachedMeta = metaMap[raw.id] ?? (turnId ? metaMap[turnId] : null) ?? {};
 
   return {
     id: raw.id,
@@ -64,30 +29,16 @@ const toAppointment = (raw = {}) => {
       name: raw.patient?.name ?? '',
     },
     doctor: {
-      id:
-        doctorObj.doctorId ??
-        doctorObj.id ??
-        raw.doctorId ??
-        cachedMeta.doctorId ??
-        null,
-      name:
-        doctorObj.name ??
-        raw.doctorName ??
-        cachedMeta.doctorName ??
-        'Profesional Médico',
+      id: doctorObj.doctorId ?? doctorObj.id ?? raw.doctorId ?? null,
+      name: doctorObj.name ?? raw.doctorName ?? 'Profesional Médico',
     },
     speciality: {
       id:
         specialityObj.specialityId ??
         specialityObj.specialtyId ??
         specialityObj.id ??
-        cachedMeta.specialityId ??
         null,
-      name:
-        specialityObj.name ??
-        raw.specialityName ??
-        cachedMeta.specialityName ??
-        'Consulta Médica',
+      name: specialityObj.name ?? raw.specialityName ?? 'Consulta Médica',
     },
   };
 };
@@ -141,9 +92,6 @@ const getAppointmentsByDate = async (date, { signal } = {}) =>
 // POST /api/appointments
 const createAppointment = async ({
   doctorId,
-  doctorName,
-  specialityId,
-  specialityName,
   availabilitySlotId,
   patientDni,
   reason,
@@ -159,13 +107,6 @@ const createAppointment = async ({
   };
 
   const { data } = await instance.post(APPOINTMENTS_ENDPOINT, payload);
-
-  saveAppointmentMetadata(data?.id, data?.turnId ?? availabilitySlotId, {
-    doctorId,
-    doctorName,
-    specialityId,
-    specialityName,
-  });
 
   return toAppointment(data);
 };

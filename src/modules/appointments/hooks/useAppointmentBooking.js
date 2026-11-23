@@ -58,7 +58,10 @@ function useAppointmentBooking() {
     setIsLoadingCatalog(true);
     setCatalogError('');
 
-    Promise.all([getSpecialities(query, options), getDoctors(query, options)])
+    Promise.all([
+      getSpecialities({ ...query, isActive: true }, options),
+      getDoctors(query, options),
+    ])
       .then(([specialitiesRes, doctorsRes]) => {
         const specItems = specialitiesRes.items;
         const docItems = doctorsRes.items;
@@ -271,9 +274,6 @@ function useAppointmentBooking() {
       try {
         const created = await createAppointment({
           doctorId: selectedDoctorId,
-          doctorName: currentDoctor?.name,
-          specialityId: currentDoctor?.speciality?.id,
-          specialityName: currentDoctor?.speciality?.name,
           availabilitySlotId: selectedSlot.id,
           patientDni: user.dni,
           reason,

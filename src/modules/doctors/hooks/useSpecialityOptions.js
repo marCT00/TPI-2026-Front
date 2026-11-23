@@ -14,7 +14,7 @@ function useSpecialityOptions() {
     const controller = new AbortController();
 
     getSpecialities(
-      { pageSize: MAX_OPTIONS, pageIndex: 1 },
+      { pageSize: MAX_OPTIONS, pageIndex: 1, isActive: true },
       { signal: controller.signal }
     )
       .then((result) =>

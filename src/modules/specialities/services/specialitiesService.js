@@ -1,58 +1,24 @@
 import { instance } from '../../shared/api/axiosInstance';
 
 const SPECIALITIES_ENDPOINT = 'api/specialities';
-const INACTIVE_STORAGE_KEY = 'tpi_inactive_specialities';
 
-const getInactiveIds = () => {
-  try {
-    const raw = window.localStorage.getItem(INACTIVE_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-
-    return new Set(Array.isArray(parsed) ? parsed : []);
-  } catch {
-    return new Set();
-  }
-};
-
-const setSpecialityActiveState = (id, isActive) => {
-  if (!id) {
-    return;
-  }
-
-  try {
-    const inactiveIds = getInactiveIds();
-
-    if (isActive) {
-      inactiveIds.delete(id);
-    } else {
-      inactiveIds.add(id);
-    }
-
-    window.localStorage.setItem(
-      INACTIVE_STORAGE_KEY,
-      JSON.stringify([...inactiveIds])
-    );
-  } catch {
-    // Si localStorage no está disponible, se mantiene el estado del backend.
-  }
-};
-
-const toSpeciality = (raw, inactiveIds = getInactiveIds()) => ({
+const toSpeciality = (raw) => ({
   id: raw.id,
   name: raw.name,
   description: raw.description,
-  isActive: inactiveIds.has(raw.id) ? false : (raw.isActive ?? true),
+  isActive: raw.isActive ?? true,
 });
 
-const toRequest = ({ name, description }) => ({
+const toRequest = ({ name, description, isActive = true }) => ({
   name: name.trim(),
   description: description.trim(),
+  isActive: Boolean(isActive),
 });
 
-// GET /api/specialities?pageSize&pageIndex&name
+// GET /api/specialities?pageSize&pageIndex&name&isActive
 // El backend responde 400 si "name" llega vacío, por eso solo se envía si hay texto.
 const getSpecialities = async (
-  { pageSize = 10, pageIndex = 1, name = '' } = {},
+  { pageSize = 10, pageIndex = 1, name = '', isActive } = {},
   { signal } = {}
 ) => {
   const params = { pageSize, pageIndex };
@@ -61,14 +27,17 @@ const getSpecialities = async (
     params.name = name;
   }
 
+  if (typeof isActive === 'boolean') {
+    params.isActive = isActive;
+  }
+
   const { data } = await instance.get(SPECIALITIES_ENDPOINT, {
     params,
     signal,
   });
-  const inactiveIds = getInactiveIds();
 
   return {
-    items: (data?.data ?? []).map((item) => toSpeciality(item, inactiveIds)),
+    items: (data?.data ?? []).map(toSpeciality),
     total: data?.total ?? 0,
   };
 };
@@ -85,8 +54,6 @@ const createSpeciality = async (values) => {
     toRequest(values)
   );
 
-  setSpecialityActiveState(data?.id, values.isActive ?? true);
-
   return toSpeciality(data);
 };
 
@@ -96,15 +63,12 @@ const updateSpeciality = async (id, values) => {
     toRequest(values)
   );
 
-  setSpecialityActiveState(id, values.isActive ?? true);
-
   return toSpeciality(data);
 };
 
 // Baja lógica: el backend marca la especialidad como "deleted".
 const deleteSpeciality = async (id) => {
   await instance.delete(`${SPECIALITIES_ENDPOINT}/${id}`);
-  setSpecialityActiveState(id, true);
 };
 
 export {
