@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { clearSession, getToken } from './sessionStore';
 import { parseBackendError } from './parseBackendError';
+import { getLoginPath, getRoleForPath } from '../../auth/helpers/roles';
 
 const AUTH_ENDPOINT_PREFIX = 'api/auth/';
 
@@ -23,9 +24,10 @@ instance.interceptors.request.use((config) => {
 const isAuthRequest = (config) =>
   (config?.url ?? '').replace(/^\//, '').startsWith(AUTH_ENDPOINT_PREFIX);
 
+// La regla "qué área es esta URL y cuál es su login" vive solo en roles.js.
 const redirectToLogin = () => {
   const { pathname } = window.location;
-  const loginPath = pathname.startsWith('/admin') ? '/admin/login' : '/login';
+  const loginPath = getLoginPath(getRoleForPath(pathname));
 
   if (pathname !== loginPath) {
     window.location.assign(loginPath);
