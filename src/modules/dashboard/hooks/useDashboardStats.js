@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { searchAppointments } from '../../appointments/services/appointmentsService';
 import { getDoctors } from '../../doctors/services/doctorsService';
 import { getSpecialities } from '../../specialities/services/specialitiesService';
+import { countDoctorsAddedInMonth } from '../helpers/dashboardMetrics';
+
+const DOCTORS_STATS_PAGE_SIZE = 100;
 
 // Fecha actual en formato local YYYY-MM-DD (sin desfase UTC).
 const getTodayIsoDate = () => {
@@ -19,6 +22,7 @@ const isConfirmedStatus = (status) =>
 function useDashboardStats() {
   const [stats, setStats] = useState({
     activeDoctors: 0,
+    doctorsAddedThisMonth: 0,
     activeSpecialities: 0,
     todayAppointments: 0,
   });
@@ -33,7 +37,7 @@ function useDashboardStats() {
     setIsLoading(true);
 
     Promise.allSettled([
-      getDoctors({ pageSize: 1, pageIndex: 1 }, options),
+      getDoctors({ pageSize: DOCTORS_STATS_PAGE_SIZE, pageIndex: 1 }, options),
       getSpecialities({ pageSize: 1, pageIndex: 1 }, options),
       searchAppointments(
         { pageSize: 50, pageIndex: 1, filters: { date: today } },
@@ -46,6 +50,10 @@ function useDashboardStats() {
 
       const activeDoctors =
         doctorsRes.status === 'fulfilled' ? doctorsRes.value.total : 0;
+      const doctorsAddedThisMonth =
+        doctorsRes.status === 'fulfilled'
+          ? countDoctorsAddedInMonth(doctorsRes.value.items)
+          : 0;
       const activeSpecialities =
         specialitiesRes.status === 'fulfilled'
           ? specialitiesRes.value.total
@@ -63,7 +71,12 @@ function useDashboardStats() {
           items.length > 0 ? confirmedCount : appointmentsRes.value.total;
       }
 
-      setStats({ activeDoctors, activeSpecialities, todayAppointments });
+      setStats({
+        activeDoctors,
+        doctorsAddedThisMonth,
+        activeSpecialities,
+        todayAppointments,
+      });
       setIsLoading(false);
     });
 

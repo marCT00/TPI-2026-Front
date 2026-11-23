@@ -6,6 +6,7 @@ const toDoctor = (raw) => ({
   id: raw.id,
   name: raw.name,
   licenseNumber: raw.licenseNumber ?? '',
+  createdAt: raw.createdAt ?? null,
   speciality: {
     id: raw.speciality?.id ?? null,
     name: raw.speciality?.name ?? 'Sin especialidad',
