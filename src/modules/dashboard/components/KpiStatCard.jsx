@@ -1,10 +1,5 @@
+import Badge from '../../shared/ui/atoms/Badge';
 import Card from '../../shared/ui/atoms/Card';
-
-const BADGE_STYLES = {
-  active: 'bg-med-active-bg text-med-active-text',
-  neutral: 'bg-gray-100 text-gray-600',
-  primary: 'bg-med-primary-100 text-med-primary-700',
-};
 
 function KpiStatCard({
   icon,
@@ -14,8 +9,6 @@ function KpiStatCard({
   value,
   isLoading = false,
 }) {
-  const badgeClass = BADGE_STYLES[badgeVariant] || BADGE_STYLES.neutral;
-
   return (
     <Card as="article" className="flex flex-col justify-between p-6">
       <div className="flex items-start justify-between">
@@ -25,13 +18,7 @@ function KpiStatCard({
         >
           {icon}
         </div>
-        {badgeText && (
-          <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${badgeClass}`}
-          >
-            {badgeText}
-          </span>
-        )}
+        {badgeText && <Badge variant={badgeVariant}>{badgeText}</Badge>}
       </div>
 
       <div className="mt-6">

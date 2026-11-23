@@ -32,6 +32,7 @@ const FIELD_ERRORS = {
 const toFormValues = (speciality) => ({
   name: speciality.name,
   description: speciality.description,
+  isActive: String(speciality.isActive),
 });
 
 function SpecialityFormPage() {
@@ -131,7 +132,6 @@ function SpecialityFormPage() {
           <SpecialityForm
             key={speciality?.id ?? 'new'}
             defaultValues={speciality ? toFormValues(speciality) : undefined}
-            isActive={speciality?.isActive ?? true}
             submitError={submitError}
             submitLabel={isEdit ? 'Guardar Cambios' : 'Guardar Especialidad'}
             onSubmit={handleSubmit}

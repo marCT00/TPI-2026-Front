@@ -8,6 +8,7 @@ import SearchInput from '../../shared/ui/molecules/SearchInput';
 import TablePagination from '../../shared/ui/molecules/TablePagination';
 import DirectoryDoctorsTable from '../components/DirectoryDoctorsTable';
 import KpiStatCard from '../components/KpiStatCard';
+import { formatMonthlyAddedBadge } from '../helpers/dashboardMetrics';
 import useDashboardStats from '../hooks/useDashboardStats';
 
 function OverviewPage() {
@@ -61,7 +62,11 @@ function OverviewPage() {
           label="Doctores Activos"
           value={stats.activeDoctors}
           isLoading={isLoadingStats}
-          badgeText="Activos"
+          badgeText={
+            isLoadingStats
+              ? '...'
+              : formatMonthlyAddedBadge(stats.doctorsAddedThisMonth)
+          }
           badgeVariant="active"
           icon={
             <svg

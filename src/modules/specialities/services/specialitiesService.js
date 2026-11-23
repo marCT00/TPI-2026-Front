@@ -1,12 +1,47 @@
 import { instance } from '../../shared/api/axiosInstance';
 
 const SPECIALITIES_ENDPOINT = 'api/specialities';
+const INACTIVE_STORAGE_KEY = 'tpi_inactive_specialities';
 
-const toSpeciality = (raw) => ({
+const getInactiveIds = () => {
+  try {
+    const raw = window.localStorage.getItem(INACTIVE_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const setSpecialityActiveState = (id, isActive) => {
+  if (!id) {
+    return;
+  }
+
+  try {
+    const inactiveIds = getInactiveIds();
+
+    if (isActive) {
+      inactiveIds.delete(id);
+    } else {
+      inactiveIds.add(id);
+    }
+
+    window.localStorage.setItem(
+      INACTIVE_STORAGE_KEY,
+      JSON.stringify([...inactiveIds])
+    );
+  } catch {
+    // Si localStorage no está disponible, se mantiene el estado del backend.
+  }
+};
+
+const toSpeciality = (raw, inactiveIds = getInactiveIds()) => ({
   id: raw.id,
   name: raw.name,
   description: raw.description,
-  isActive: raw.isActive ?? true,
+  isActive: inactiveIds.has(raw.id) ? false : (raw.isActive ?? true),
 });
 
 const toRequest = ({ name, description }) => ({
@@ -30,9 +65,10 @@ const getSpecialities = async (
     params,
     signal,
   });
+  const inactiveIds = getInactiveIds();
 
   return {
-    items: (data?.data ?? []).map(toSpeciality),
+    items: (data?.data ?? []).map((item) => toSpeciality(item, inactiveIds)),
     total: data?.total ?? 0,
   };
 };
@@ -49,6 +85,8 @@ const createSpeciality = async (values) => {
     toRequest(values)
   );
 
+  setSpecialityActiveState(data?.id, values.isActive ?? true);
+
   return toSpeciality(data);
 };
 
@@ -58,12 +96,15 @@ const updateSpeciality = async (id, values) => {
     toRequest(values)
   );
 
+  setSpecialityActiveState(id, values.isActive ?? true);
+
   return toSpeciality(data);
 };
 
 // Baja lógica: el backend marca la especialidad como "deleted".
 const deleteSpeciality = async (id) => {
   await instance.delete(`${SPECIALITIES_ENDPOINT}/${id}`);
+  setSpecialityActiveState(id, true);
 };
 
 export {

@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import Button from '../../shared/ui/atoms/Button';
 import Input from '../../shared/ui/atoms/Input';
+import Select from '../../shared/ui/atoms/Select';
 import TextArea from '../../shared/ui/atoms/TextArea';
 import { SaveIcon } from '../../shared/ui/atoms/icons';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
@@ -10,15 +11,18 @@ import {
   descriptionRules,
   nameRules,
 } from '../helpers/specialityRules';
-import SpecialityStatusBadge from './SpecialityStatusBadge';
 
-const EMPTY_VALUES = { name: '', description: '' };
+const STATUS_OPTIONS = [
+  { value: 'true', label: 'Activo - Disponible para programación' },
+  { value: 'false', label: 'Desactivado - No disponible para programación' },
+];
+
+const EMPTY_VALUES = { name: '', description: '', isActive: 'true' };
 
 // Formulario de alta/edición. No conoce el backend: recibe onSubmit y, si
 // falla, la página le indica qué campo marcar mediante setFieldError.
 function SpecialityForm({
   defaultValues = EMPTY_VALUES,
-  isActive = true,
   submitError = '',
   submitLabel = 'Guardar Especialidad',
   onSubmit,
@@ -35,9 +39,15 @@ function SpecialityForm({
   const descriptionLength = (watch('description') ?? '').length;
 
   const onValid = (values) =>
-    onSubmit(values, {
-      setFieldError: (field, message) => setError(field, { message }),
-    });
+    onSubmit(
+      {
+        ...values,
+        isActive: values.isActive === true || values.isActive === 'true',
+      },
+      {
+        setFieldError: (field, message) => setError(field, { message }),
+      }
+    );
 
   return (
     <form noValidate onSubmit={handleSubmit(onValid)}>
@@ -62,15 +72,11 @@ function SpecialityForm({
           {...register('description', descriptionRules)}
         />
 
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-med-text-main">
-            Estado
-          </span>
-          <p className="flex items-center gap-2 text-xs text-med-text-sub">
-            <SpecialityStatusBadge isActive={isActive} />
-            {isActive && 'Disponible para programación'}
-          </p>
-        </div>
+        <Select
+          label="Estado inicial"
+          options={STATUS_OPTIONS}
+          {...register('isActive')}
+        />
 
         {submitError && <AlertBanner>{submitError}</AlertBanner>}
 
