@@ -1,13 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Card from '../../shared/ui/atoms/Card';
 import Spinner from '../../shared/ui/atoms/Spinner';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
-import useToast from '../../shared/ui/organisms/toast/useToast';
-import {
-  getApiError,
-  getErrorMessage,
-} from '../../shared/api/parseBackendError';
+import { getErrorMessage } from '../../shared/api/parseBackendError';
+import useEntityFormPage from '../../shared/hooks/useEntityFormPage';
 import SpecialityForm from '../components/SpecialityForm';
 import useSpecialityForm from '../hooks/useSpecialityForm';
 
@@ -37,51 +33,21 @@ const toFormValues = (speciality) => ({
 
 function SpecialityFormPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { showToast } = useToast();
   const { isEdit, speciality, isLoading, loadError, save } =
     useSpecialityForm(id);
-  const [submitError, setSubmitError] = useState('');
+  const { notFound, submitError, handleSubmit, goToList } = useEntityFormPage({
+    save,
+    loadError,
+    listPath: LIST_PATH,
+    fieldErrors: FIELD_ERRORS,
+    notFoundMessage: 'La especialidad que intentás editar no existe.',
+    getSuccessMessage: (saved) =>
+      isEdit
+        ? `Se actualizó la especialidad "${saved.name}".`
+        : `Se creó la especialidad "${saved.name}".`,
+  });
 
   const title = isEdit ? 'Editar Especialidad' : 'Registrar Nueva Especialidad';
-  const notFound = getApiError(loadError)?.status === 404;
-
-  // Si la especialidad no existe (o fue dada de baja), vuelve al listado.
-  useEffect(() => {
-    if (loadError && notFound) {
-      showToast({
-        variant: 'warning',
-        message: 'La especialidad que intentás editar no existe.',
-      });
-      navigate(LIST_PATH, { replace: true });
-    }
-  }, [loadError, notFound, navigate, showToast]);
-
-  const handleSubmit = async (values, { setFieldError }) => {
-    setSubmitError('');
-
-    try {
-      const saved = await save(values);
-
-      showToast({
-        variant: 'success',
-        message: isEdit
-          ? `Se actualizó la especialidad "${saved.name}".`
-          : `Se creó la especialidad "${saved.name}".`,
-      });
-      navigate(LIST_PATH);
-    } catch (error) {
-      const fieldError = FIELD_ERRORS[getApiError(error).errorCode];
-
-      if (fieldError) {
-        setFieldError(...fieldError);
-
-        return;
-      }
-
-      setSubmitError(getErrorMessage(error));
-    }
-  };
 
   return (
     <section
@@ -135,7 +101,7 @@ function SpecialityFormPage() {
             submitError={submitError}
             submitLabel={isEdit ? 'Guardar Cambios' : 'Guardar Especialidad'}
             onSubmit={handleSubmit}
-            onCancel={() => navigate(LIST_PATH)}
+            onCancel={goToList}
           />
         )}
       </Card>
