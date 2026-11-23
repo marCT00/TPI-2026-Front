@@ -23,7 +23,7 @@ const dniRules = {
   setValueAs: (value) => String(value ?? '').trim(),
   pattern: {
     value: DNI_PATTERN,
-    message: 'El DNI debe tener 7 u 10 dígitos, sin puntos',
+    message: 'El DNI debe tener 7 u 8 dígitos, sin puntos',
   },
 };
 
