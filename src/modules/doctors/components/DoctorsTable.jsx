@@ -1,6 +1,6 @@
 import ListSkeleton from '../../shared/ui/molecules/ListSkeleton';
 import TableSkeleton from '../../shared/ui/molecules/TableSkeleton';
-import { TrashIcon } from '../../shared/ui/atoms/icons';
+import { ClockIcon, PencilIcon, TrashIcon } from '../../shared/ui/atoms/icons';
 
 const COLUMNS = 3;
 const TITLE_PREFIX = /^(dr|dra)\.?\s+/i;
@@ -33,22 +33,59 @@ function SpecialityTag({ name }) {
   );
 }
 
-function DeleteButton({ doctor, onDelete }) {
+function RowActions({ doctor, onEdit, onManageAvailability, onDelete }) {
+  if (!onEdit && !onManageAvailability && !onDelete) {
+    return null;
+  }
+
   return (
-    <button
-      type="button"
-      title="Eliminar doctor"
-      aria-label={`Eliminar ${doctor.name}`}
-      onClick={() => onDelete(doctor)}
-      className="p-1.5 rounded-lg text-med-text-muted hover:bg-red-50 hover:text-med-danger-text transition"
-    >
-      <TrashIcon />
-    </button>
+    <div className="flex items-center justify-end gap-2 shrink-0">
+      {onEdit && (
+        <button
+          type="button"
+          title="Editar doctor"
+          aria-label={`Editar ${doctor.name}`}
+          onClick={() => onEdit(doctor)}
+          className="p-1.5 rounded-lg text-med-text-muted hover:bg-med-primary-50 hover:text-med-primary-900 transition"
+        >
+          <PencilIcon />
+        </button>
+      )}
+      {onManageAvailability && (
+        <button
+          type="button"
+          title="Gestionar disponibilidad horaria"
+          aria-label={`Gestionar disponibilidad de ${doctor.name}`}
+          onClick={() => onManageAvailability(doctor)}
+          className="p-1.5 rounded-lg text-med-text-muted hover:bg-med-primary-50 hover:text-med-primary-900 transition"
+        >
+          <ClockIcon />
+        </button>
+      )}
+      {onDelete && (
+        <button
+          type="button"
+          title="Eliminar doctor"
+          aria-label={`Eliminar ${doctor.name}`}
+          onClick={() => onDelete(doctor)}
+          className="p-1.5 rounded-lg text-med-text-muted hover:bg-red-50 hover:text-med-danger-text transition"
+        >
+          <TrashIcon />
+        </button>
+      )}
+    </div>
   );
 }
 
 // En mobile se muestra como lista de tarjetas y desde md como tabla.
-function DoctorsTable({ items, isLoading, emptyMessage, onDelete }) {
+function DoctorsTable({
+  items,
+  isLoading,
+  emptyMessage,
+  onEdit,
+  onManageAvailability,
+  onDelete,
+}) {
   const isEmpty = !isLoading && items.length === 0;
 
   return (
@@ -80,9 +117,12 @@ function DoctorsTable({ items, isLoading, emptyMessage, onDelete }) {
                       <SpecialityTag name={doctor.speciality.name} />
                     </div>
                   </div>
-                  {onDelete && (
-                    <DeleteButton doctor={doctor} onDelete={onDelete} />
-                  )}
+                  <RowActions
+                    doctor={doctor}
+                    onEdit={onEdit}
+                    onManageAvailability={onManageAvailability}
+                    onDelete={onDelete}
+                  />
                 </article>
               </li>
             ))}
@@ -144,9 +184,12 @@ function DoctorsTable({ items, isLoading, emptyMessage, onDelete }) {
                     <SpecialityTag name={doctor.speciality.name} />
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {onDelete && (
-                      <DeleteButton doctor={doctor} onDelete={onDelete} />
-                    )}
+                    <RowActions
+                      doctor={doctor}
+                      onEdit={onEdit}
+                      onManageAvailability={onManageAvailability}
+                      onDelete={onDelete}
+                    />
                   </td>
                 </tr>
               ))}

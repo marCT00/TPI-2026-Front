@@ -29,12 +29,15 @@ const getSpecialityPlaceholder = (isLoading, hasOptions) => {
     : 'Primero registrá una especialidad';
 };
 
-// No conoce el backend: recibe las especialidades y onSubmit. Si el guardado
-// falla, la página marca el campo con setFieldError.
+// Sirve para alta y edición. No conoce el backend: recibe los valores
+// iniciales, las especialidades y onSubmit. Si el guardado falla, la página
+// marca el campo con setFieldError.
 function DoctorForm({
-  specialityOptions,
-  isLoadingSpecialities,
+  defaultValues = EMPTY_VALUES,
+  specialityOptions = [],
+  isLoadingSpecialities = false,
   submitError = '',
+  submitLabel = 'Guardar Doctor',
   onSubmit,
   onCancel,
 }) {
@@ -43,7 +46,7 @@ function DoctorForm({
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm({ defaultValues: EMPTY_VALUES, mode: 'onTouched' });
+  } = useForm({ defaultValues, mode: 'onTouched' });
 
   const hasOptions = specialityOptions.length > 0;
 
@@ -98,7 +101,7 @@ function DoctorForm({
           </Button>
           <Button type="submit" isLoading={isSubmitting}>
             {!isSubmitting && <SaveIcon />}
-            Guardar Doctor
+            {submitLabel}
           </Button>
         </footer>
       </fieldset>

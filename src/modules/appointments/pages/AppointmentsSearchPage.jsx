@@ -1,7 +1,11 @@
+import { useState } from 'react';
+import Button from '../../shared/ui/atoms/Button';
 import Card from '../../shared/ui/atoms/Card';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
 import TablePagination from '../../shared/ui/molecules/TablePagination';
+import Modal from '../../shared/ui/organisms/Modal';
 import AppointmentFilters from '../components/AppointmentFilters';
+import AppointmentStatusBadge from '../components/AppointmentStatusBadge';
 import AppointmentsTable from '../components/AppointmentsTable';
 import useAppointmentsSearch, {
   EMPTY_FILTERS,
@@ -11,6 +15,7 @@ import useFilterOptions from '../hooks/useFilterOptions';
 function AppointmentsSearchPage() {
   const search = useAppointmentsSearch();
   const options = useFilterOptions();
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   const getEmptyMessage = () => {
     if (search.error) {
@@ -84,6 +89,7 @@ function AppointmentsSearchPage() {
           items={search.items}
           isLoading={search.isLoading}
           emptyMessage={getEmptyMessage()}
+          onViewDetail={setSelectedAppointment}
         />
         <TablePagination
           currentPage={search.page}
@@ -93,6 +99,67 @@ function AppointmentsSearchPage() {
           onPageChange={search.setPage}
         />
       </Card>
+
+      <Modal
+        open={Boolean(selectedAppointment)}
+        onClose={() => setSelectedAppointment(null)}
+        title="Detalle de la Cita Médica"
+        description="Información completa del turno registrado en el sistema."
+        size="sm"
+        footer={
+          <Button
+            variant="outline"
+            onClick={() => setSelectedAppointment(null)}
+          >
+            Cerrar
+          </Button>
+        }
+      >
+        {selectedAppointment && (
+          <dl className="p-4 bg-med-primary-50/70 border border-med-border rounded-xl text-xs space-y-2.5">
+            <div className="flex items-center justify-between gap-2 pb-2 border-b border-med-border-subtle">
+              <dt className="font-semibold text-med-text-sub">Estado:</dt>
+              <dd>
+                <AppointmentStatusBadge status={selectedAppointment.status} />
+              </dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="font-semibold text-med-text-sub">Fecha y Hora:</dt>
+              <dd className="font-semibold text-med-primary-900 text-right">
+                {selectedAppointment.date} • {selectedAppointment.startTime} a{' '}
+                {selectedAppointment.endTime} hs
+              </dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="font-semibold text-med-text-sub">Especialidad:</dt>
+              <dd className="text-med-text-main text-right">
+                {selectedAppointment.speciality.name}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="font-semibold text-med-text-sub">Profesional:</dt>
+              <dd className="text-med-text-main text-right">
+                {selectedAppointment.doctor.name}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="font-semibold text-med-text-sub">Paciente:</dt>
+              <dd className="text-med-text-main text-right">
+                {selectedAppointment.patient.name || 'Paciente'} (DNI:{' '}
+                {selectedAppointment.patient.dni})
+              </dd>
+            </div>
+            <div className="pt-2 border-t border-med-border-subtle">
+              <dt className="font-semibold text-med-text-sub mb-1">
+                Motivo de la Consulta:
+              </dt>
+              <dd className="text-med-text-main leading-relaxed">
+                {selectedAppointment.reason || 'Sin motivo especificado.'}
+              </dd>
+            </div>
+          </dl>
+        )}
+      </Modal>
     </section>
   );
 }

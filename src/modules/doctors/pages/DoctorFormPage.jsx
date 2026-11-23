@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Card from '../../shared/ui/atoms/Card';
-import { UserPlusIcon } from '../../shared/ui/atoms/icons';
+import Spinner from '../../shared/ui/atoms/Spinner';
+import { PencilIcon, UserPlusIcon } from '../../shared/ui/atoms/icons';
 import AlertBanner from '../../shared/ui/molecules/AlertBanner';
 import useToast from '../../shared/ui/organisms/toast/useToast';
 import {
@@ -9,8 +10,8 @@ import {
   getErrorMessage,
 } from '../../shared/api/parseBackendError';
 import DoctorForm from '../components/DoctorForm';
+import useDoctorForm from '../hooks/useDoctorForm';
 import useSpecialityOptions from '../hooks/useSpecialityOptions';
-import { createDoctor } from '../services/doctorsService';
 
 const LIST_PATH = '/admin/doctors';
 
@@ -34,21 +35,47 @@ const FIELD_ERRORS = {
   ],
 };
 
+const toFormValues = (doctor) => ({
+  name: doctor.name,
+  specialityId: doctor.speciality.id ?? '',
+  licenseNumber: doctor.licenseNumber,
+});
+
 function DoctorFormPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { isEdit, doctor, isLoading, loadError, save } = useDoctorForm(id);
   const specialities = useSpecialityOptions();
   const [submitError, setSubmitError] = useState('');
+
+  const notFound = getApiError(loadError)?.status === 404;
+  // En edición se espera también a las especialidades, para que el select
+  // pueda marcar la del médico.
+  const isPreparing = isLoading || (isEdit && specialities.isLoading);
+
+  // Si el médico no existe (o fue dado de baja), vuelve al listado.
+  useEffect(() => {
+    if (loadError && notFound) {
+      showToast({
+        variant: 'warning',
+        message: 'El médico que intentás editar no existe.',
+      });
+      navigate(LIST_PATH, { replace: true });
+    }
+  }, [loadError, notFound, navigate, showToast]);
 
   const handleSubmit = async (values, { setFieldError }) => {
     setSubmitError('');
 
     try {
-      const saved = await createDoctor(values);
+      const saved = await save(values);
 
       showToast({
         variant: 'success',
-        message: `Se registró a "${saved.name}".`,
+        message: isEdit
+          ? `Se actualizó a "${saved.name}".`
+          : `Se registró a "${saved.name}".`,
       });
       navigate(LIST_PATH);
     } catch (error) {
@@ -81,7 +108,7 @@ function DoctorFormPage() {
             aria-current="page"
             className="font-semibold text-med-primary-900"
           >
-            Agregar Nuevo Doctor
+            {isEdit ? 'Editar Doctor' : 'Agregar Nuevo Doctor'}
           </li>
         </ol>
       </nav>
@@ -92,12 +119,17 @@ function DoctorFormPage() {
             id="doctor-form-title"
             className="flex items-center gap-2 text-xl font-bold text-med-primary-900"
           >
-            <UserPlusIcon className="w-5 h-5" />
-            Registrar Nuevo Doctor
+            {isEdit ? (
+              <PencilIcon className="w-5 h-5" />
+            ) : (
+              <UserPlusIcon className="w-5 h-5" />
+            )}
+            {isEdit ? 'Editar Doctor' : 'Registrar Nuevo Doctor'}
           </h1>
           <p className="text-sm text-med-text-sub mt-1">
-            Complete todos los campos obligatorios para integrar al nuevo
-            facultativo al sistema del centro médico.
+            {isEdit
+              ? 'Modifique el nombre, la especialidad o el número de licencia del profesional.'
+              : 'Complete todos los campos obligatorios para integrar al nuevo facultativo al sistema del centro médico.'}
           </p>
         </header>
 
@@ -108,13 +140,30 @@ function DoctorFormPage() {
             </AlertBanner>
           )}
 
-          <DoctorForm
-            specialityOptions={specialities.options}
-            isLoadingSpecialities={specialities.isLoading}
-            submitError={submitError}
-            onSubmit={handleSubmit}
-            onCancel={() => navigate(LIST_PATH)}
-          />
+          {isPreparing && (
+            <div className="flex justify-center py-10 text-med-primary-900">
+              <Spinner size="lg" label="Cargando médico" />
+            </div>
+          )}
+
+          {!isPreparing && loadError && !notFound && (
+            <AlertBanner title="No se pudo cargar el médico">
+              {getErrorMessage(loadError)}
+            </AlertBanner>
+          )}
+
+          {!isPreparing && !loadError && (
+            <DoctorForm
+              key={doctor?.id ?? 'new'}
+              defaultValues={doctor ? toFormValues(doctor) : undefined}
+              specialityOptions={specialities.options}
+              isLoadingSpecialities={specialities.isLoading}
+              submitError={submitError}
+              submitLabel={isEdit ? 'Guardar Cambios' : 'Guardar Doctor'}
+              onSubmit={handleSubmit}
+              onCancel={() => navigate(LIST_PATH)}
+            />
+          )}
         </div>
       </Card>
     </section>

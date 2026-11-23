@@ -6,6 +6,7 @@ const toDoctor = (raw) => ({
   id: raw.id,
   name: raw.name,
   licenseNumber: raw.licenseNumber ?? '',
+  createdAt: raw.createdAt ?? null,
   speciality: {
     id: raw.speciality?.id ?? null,
     name: raw.speciality?.name ?? 'Sin especialidad',
@@ -18,16 +19,20 @@ const toRequest = ({ name, licenseNumber, specialityId }) => ({
   specialityId,
 });
 
-// GET /api/doctors?pageSize&pageIndex&name
+// GET /api/doctors?pageSize&pageIndex&name&specialityId
 // El nombre solo se manda si hay texto, porque el backend valida su longitud.
 const getDoctors = async (
-  { pageSize = 10, pageIndex = 1, name = '' } = {},
+  { pageSize = 10, pageIndex = 1, name = '', specialityId = '' } = {},
   { signal } = {}
 ) => {
   const params = { pageSize, pageIndex };
 
   if (name) {
     params.name = name;
+  }
+
+  if (specialityId) {
+    params.specialityId = specialityId;
   }
 
   const { data } = await instance.get(DOCTORS_ENDPOINT, { params, signal });

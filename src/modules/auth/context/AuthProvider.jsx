@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useToast from '../../shared/ui/organisms/toast/useToast';
+import { getErrorMessage } from '../../shared/api/parseBackendError';
 import { loginAdmin, loginPatient } from '../services/authService';
 import {
   buildSession,
@@ -78,6 +79,28 @@ function AuthProvider({ children }) {
     [startSession]
   );
 
+  // Login unificado por rol o área para consumidores genéricos del contexto.
+  const signin = useCallback(
+    async (username, secret, role) => {
+      const isAdminLogin =
+        role === ROLES.ADMIN ||
+        (!role && window.location.pathname.startsWith('/admin'));
+
+      try {
+        if (isAdminLogin) {
+          await signinAdmin({ email: username, password: secret });
+        } else {
+          await signinPatient({ email: username, dni: secret });
+        }
+
+        return { error: null };
+      } catch (error) {
+        return { error: { frontendErrorMessage: getErrorMessage(error) } };
+      }
+    },
+    [signinAdmin, signinPatient]
+  );
+
   // Cierra la sesión automáticamente cuando vence el JWT (claim exp).
   useEffect(() => {
     if (!session?.expiresAt) {
@@ -109,11 +132,13 @@ function AuthProvider({ children }) {
       isAdmin: role === ROLES.ADMIN,
       isPatient: role === ROLES.PATIENT,
       homePath: getHomePath(role),
+      signin,
+      singin: signin,
       signinAdmin,
       signinPatient,
       signout,
     };
-  }, [session, signinAdmin, signinPatient, signout]);
+  }, [session, signin, signinAdmin, signinPatient, signout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
