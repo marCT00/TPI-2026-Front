@@ -3,12 +3,15 @@
 const HAS_BASE_PADDING = /(^|\s)p-\d/;
 
 // "as" permite renderizar la tarjeta como <article>, <section>, etc.
-function Card({ as = 'div', children, className = '' }) {
+// El resto de las props (aria-*, id, onClick...) llega al elemento nativo,
+// así Card se puede usar como cualquier contenedor HTML (OCP/LSP).
+function Card({ as = 'div', children, className = '', ...restProps }) {
   const Component = as;
   const padding = HAS_BASE_PADDING.test(className) ? '' : 'p-5';
 
   return (
     <Component
+      {...restProps}
       className={`bg-med-card border border-med-border rounded-xl shadow-xs ${padding} ${className}`}
     >
       {children}

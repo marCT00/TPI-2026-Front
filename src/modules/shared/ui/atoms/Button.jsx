@@ -24,9 +24,8 @@ function Button({
   className = '',
   ...restProps
 }) {
-  if (!ALLOWED_TYPES.includes(type)) {
-    console.warn(`Button: type "${type}" no soportado`);
-  }
+  // Un type inválido cae en "button" para no enviar formularios por error.
+  const safeType = ALLOWED_TYPES.includes(type) ? type : 'button';
 
   const appliedClass = `${VARIANT_STYLES[variant] || VARIANT_STYLES.default}
     inline-flex items-center justify-center gap-2
@@ -35,7 +34,7 @@ function Button({
   return (
     <button
       {...restProps}
-      type={type}
+      type={safeType}
       disabled={disabled || isLoading}
       aria-busy={isLoading || undefined}
       className={appliedClass}

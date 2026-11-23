@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useToast from '../../shared/ui/organisms/toast/useToast';
-import { getErrorMessage } from '../../shared/api/parseBackendError';
+import { setUnauthorizedHandler } from '../../shared/api/axiosInstance';
 import { loginAdmin, loginPatient } from '../services/authService';
 import {
   buildSession,
@@ -79,27 +79,14 @@ function AuthProvider({ children }) {
     [startSession]
   );
 
-  // Login unificado por rol o área para consumidores genéricos del contexto.
-  const signin = useCallback(
-    async (username, secret, role) => {
-      const isAdminLogin =
-        role === ROLES.ADMIN ||
-        (!role && window.location.pathname.startsWith('/admin'));
-
-      try {
-        if (isAdminLogin) {
-          await signinAdmin({ email: username, password: secret });
-        } else {
-          await signinPatient({ email: username, dni: secret });
-        }
-
-        return { error: null };
-      } catch (error) {
-        return { error: { frontendErrorMessage: getErrorMessage(error) } };
-      }
-    },
-    [signinAdmin, signinPatient]
-  );
+  const expireSession = useCallback(() => {
+    signout();
+    showToast({
+      variant: 'warning',
+      title: 'Sesión expirada',
+      message: 'Por seguridad, volvé a iniciar sesión.',
+    });
+  }, [signout, showToast]);
 
   // Cierra la sesión automáticamente cuando vence el JWT (claim exp).
   useEffect(() => {
@@ -108,19 +95,17 @@ function AuthProvider({ children }) {
     }
 
     const timer = setTimeout(
-      () => {
-        signout();
-        showToast({
-          variant: 'warning',
-          title: 'Sesión expirada',
-          message: 'Por seguridad, volvé a iniciar sesión.',
-        });
-      },
+      expireSession,
       Math.max(session.expiresAt - Date.now(), 0)
     );
 
     return () => clearTimeout(timer);
-  }, [session, signout, showToast]);
+  }, [session, expireSession]);
+
+  // Si el backend responde 401 (token inválido o revocado), se limpia el
+  // estado de React. ProtectedRoute redirige al login del área según su
+  // redirectTo, sin recargar la página ni duplicar la regla de roles.
+  useEffect(() => setUnauthorizedHandler(expireSession), [expireSession]);
 
   const value = useMemo(() => {
     const role = session?.role ?? null;
@@ -132,13 +117,11 @@ function AuthProvider({ children }) {
       isAdmin: role === ROLES.ADMIN,
       isPatient: role === ROLES.PATIENT,
       homePath: getHomePath(role),
-      signin,
-      singin: signin,
       signinAdmin,
       signinPatient,
       signout,
     };
-  }, [session, signin, signinAdmin, signinPatient, signout]);
+  }, [session, signinAdmin, signinPatient, signout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

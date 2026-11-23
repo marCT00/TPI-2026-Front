@@ -22,6 +22,12 @@ const LOGIN_BY_ROLE = {
   [ROLES.PATIENT]: '/login',
 };
 
+// Prefijo de URL de cada área privada. Las rutas que no coinciden con ninguno
+// pertenecen al área del paciente. Agregar un rol nuevo = sumar una entrada acá.
+const AREA_PREFIX_BY_ROLE = {
+  [ROLES.ADMIN]: '/admin',
+};
+
 const normalizeRole = (role) => {
   const key = String(role ?? '')
     .trim()
@@ -36,14 +42,20 @@ const getLoginPath = (role) => LOGIN_BY_ROLE[role] ?? '/login';
 
 const isLoginPath = (path) => Object.values(LOGIN_BY_ROLE).includes(path);
 
-const canAccessPath = (role, path) => {
-  if (!path || isLoginPath(path)) {
-    return false;
-  }
+// Rol dueño de una ruta según su prefijo de área.
+const getRoleForPath = (path = '') =>
+  Object.keys(AREA_PREFIX_BY_ROLE).find((role) =>
+    path.startsWith(AREA_PREFIX_BY_ROLE[role])
+  ) ?? ROLES.PATIENT;
 
-  const isAdminArea = path.startsWith('/admin');
+const canAccessPath = (role, path) =>
+  Boolean(path) && !isLoginPath(path) && getRoleForPath(path) === role;
 
-  return role === ROLES.ADMIN ? isAdminArea : !isAdminArea;
+export {
+  ROLES,
+  normalizeRole,
+  getHomePath,
+  getLoginPath,
+  getRoleForPath,
+  canAccessPath,
 };
-
-export { ROLES, normalizeRole, getHomePath, getLoginPath, canAccessPath };
