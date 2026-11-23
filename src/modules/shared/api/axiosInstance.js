@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { clearSession, getToken } from './sessionStore';
 import { parseBackendError } from './parseBackendError';
-import { getLoginPath, getRoleForPath } from '../../auth/helpers/roles';
 
 const AUTH_ENDPOINT_PREFIX = 'api/auth/';
 
@@ -24,14 +23,19 @@ instance.interceptors.request.use((config) => {
 const isAuthRequest = (config) =>
   (config?.url ?? '').replace(/^\//, '').startsWith(AUTH_ENDPOINT_PREFIX);
 
-// La regla "qué área es esta URL y cuál es su login" vive solo en roles.js.
-const redirectToLogin = () => {
-  const { pathname } = window.location;
-  const loginPath = getLoginPath(getRoleForPath(pathname));
+// La capa shared no conoce roles ni rutas (DIP): solo avisa que la sesión dejó
+// de ser válida. Qué hacer después lo decide quien registre el handler
+// (AuthProvider).
+let unauthorizedHandler = null;
 
-  if (pathname !== loginPath) {
-    window.location.assign(loginPath);
-  }
+const setUnauthorizedHandler = (handler) => {
+  unauthorizedHandler = handler;
+
+  return () => {
+    if (unauthorizedHandler === handler) {
+      unauthorizedHandler = null;
+    }
+  };
 };
 
 instance.interceptors.response.use(
@@ -40,12 +44,19 @@ instance.interceptors.response.use(
     error.apiError = parseBackendError(error);
 
     if (error.apiError.status === 401 && !isAuthRequest(error.config)) {
+      // Varias requests en paralelo pueden volver con 401: solo la primera
+      // (la que todavía encuentra sesión guardada) dispara el handler.
+      const hadSession = Boolean(getToken());
+
       clearSession();
-      redirectToLogin();
+
+      if (hadSession) {
+        unauthorizedHandler?.();
+      }
     }
 
     return Promise.reject(error);
   }
 );
 
-export { instance };
+export { instance, setUnauthorizedHandler };
